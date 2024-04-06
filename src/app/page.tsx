@@ -1,7 +1,8 @@
+import ToDo from '../components/ToDo';
 export default function Home() {
   return (
     <div>
-      <h1>Hola, Mundo</h1>
+      <ToDo />
     </div>
   );
 }
