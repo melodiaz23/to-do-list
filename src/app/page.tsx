@@ -1,5 +1,5 @@
 'use client';
-import { Task } from '@/types';
+import { Id, Task } from '@/types';
 import {
   closestCenter,
   DndContext,
@@ -24,7 +24,9 @@ import Done from '../components/Done';
 import TasksContainer from '../components/TasksContainer';
 
 export default function Home() {
-  const [tasks, setTasks] = useState<Task[]>([{ id: uuidv4(), task: '' }]);
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [inputValue, setInputValue] = useState('');
+  const [inputField, setInputField] = useState(false);
   const [tasksDone, settasksDone] = useState([]);
   // const taskId = useMemo(() => {
   //   tasks.map((task) => task.id);
@@ -43,12 +45,22 @@ export default function Home() {
 
   const createTask = (
     event: React.MouseEvent | React.KeyboardEvent,
+    inputValue?: string,
     index?: number
   ) => {
-    const newTask: Task = { id: uuidv4(), task: '' };
-    if (index === tasks.length - 1 || event.type === 'click') {
-      setTasks([...tasks, newTask]);
-    }
+    const newTask: Task = { id: uuidv4(), task: inputValue || '' };
+    // if (index === tasks.length - 1 || event.type === 'click') {
+    setTasks([...tasks, newTask]);
+    // }
+  };
+
+  const updateTask = (id: Id, taskValue: string) => {
+    const updateTasks = tasks.map((task) => {
+      if (task.id !== id) return { id: task.id, task: task.task };
+
+      return { id: task.id, task: taskValue };
+    });
+    setTasks(updateTasks);
   };
 
   const removeTask = (id: string) => {
@@ -101,7 +113,6 @@ export default function Home() {
           <div className="grid grid-cols-2 gap-8 w-2/3 justify-self-center">
             <div>
               <h2 className="text-xl font-semibold text-center p-4">To do</h2>
-
               <div className="grid bg-white rounded-lg p-5 mb-4 shadow-md">
                 <div className="text-[#545454]">
                   <div className="w-full grid gap-3">
@@ -122,22 +133,45 @@ export default function Home() {
                             <TasksContainer
                               key={task.id}
                               task={task}
-                              createTask={createTask}
+                              updateTask={updateTask}
                               removeTask={removeTask}
                             />
                           );
                         })}
                       </SortableContext>
-
-                      <div className="flex justify-between text-white bg-[#32a88b] shadow-lg text-base  px-4 py-1.5 rounded-lg w-full leading-7">
-                        <div className="w-full">
-                          <button
-                            className="w-full border-0 bg-[#32a88b] text-white border-[#32a88b] outline-0 placeholder:text-gray-100"
-                            onClick={(e: React.MouseEvent) => createTask(e)}>
-                            Add a new task +
-                          </button>
+                      <form
+                        action=""
+                        name="task"
+                        className="grid gap-2">
+                        {inputField && (
+                          <div className="flex justify-between text-white bg-[#32a88b] shadow-lg text-base  px-4 py-1.5 rounded-lg w-full leading-7">
+                            <div className="w-full">
+                              <input
+                                type="text"
+                                placeholder="Task name"
+                                className="w-full border-0 bg-[#32a88b] text-white border-[#32a88b] outline-0 placeholder:text-gray-100"
+                                autoFocus
+                                value={inputValue}
+                                onChange={(e) => setInputValue(e.target.value)}
+                              />
+                            </div>
+                          </div>
+                        )}
+                        <div className="flex justify-between text-white bg-[#32a88b] shadow-lg text-base  px-4 py-1.5 rounded-lg w-full leading-7">
+                          <div className="w-full">
+                            <button
+                              className="w-full border-0 bg-[#32a88b] text-white border-[#32a88b] outline-0 placeholder:text-gray-100"
+                              onClick={(e: React.MouseEvent) => {
+                                e.preventDefault();
+                                inputValue && createTask(e, inputValue);
+                                setInputField(true);
+                                setInputValue('');
+                              }}>
+                              Add a new task +
+                            </button>
+                          </div>
                         </div>
-                      </div>
+                      </form>
                     </div>
                   </div>
                 </div>
@@ -169,7 +203,7 @@ export default function Home() {
             {activeCard && (
               <TasksContainer
                 task={activeCard}
-                createTask={createTask}
+                updateTask={updateTask}
                 removeTask={removeTask}></TasksContainer>
             )}
           </DragOverlay>,

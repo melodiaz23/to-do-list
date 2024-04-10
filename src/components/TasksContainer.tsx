@@ -3,11 +3,21 @@ import React, { useState } from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
-import Image from 'next/image';
 import { useDraggable } from '@dnd-kit/core';
 import CloseIcon from '@/icons/Close';
+import { Task } from '@/types';
 
-const TasksContainer = ({ task, createTask, removeTask }) => {
+interface TaskContainerProps {
+  task: Task;
+  removeTask: (id: string) => void;
+  updateTask: (id: string, task: string) => void;
+}
+
+const TasksContainer = (props: TaskContainerProps) => {
+  const { task, updateTask, removeTask } = props;
+
+  const [editMode, setEditMode] = useState(false);
+
   const {
     attributes,
     listeners,
@@ -21,11 +31,13 @@ const TasksContainer = ({ task, createTask, removeTask }) => {
       type: 'task-container',
       task,
     },
+    disabled: editMode, // Disable dragging if in edit mode
   });
 
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
+    // cursor: isDragging ? 'grabbing' : 'pointer', // Change cursor when dragging
   };
 
   if (isDragging) {
@@ -46,15 +58,26 @@ const TasksContainer = ({ task, createTask, removeTask }) => {
         ref={setNodeRef}
         style={style}
         {...attributes}
-        {...listeners}>
+        {...listeners}
+        onClick={() => setEditMode(true)}>
         <div className="w-full">
-          <input
-            type="text"
-            placeholder="Task name"
-            className="w-full border-0 bg-[#32a88b] text-white border-[#32a88b] outline-0 placeholder:text-gray-100"
-            autoFocus="true"
-            onKeyUp={(e) => e.key === 'Enter' && createTask(e, idx)}
-          />
+          {!editMode && task.task}
+          {editMode && (
+            <input
+              className="w-full border-0 bg-[#32a88b] text-white border-[#32a88b] outline-0 placeholder:text-gray-100"
+              type="text"
+              autoFocus
+              value={task.task} // Fix error with value not changing
+              onChange={(e) => {
+                updateTask(task.id.toString(), e.target.value);
+              }}
+              onBlur={() => setEditMode(false)}
+              onKeyDown={(e) => {
+                if (e.key !== 'Enter') return;
+                setEditMode(false);
+              }}
+            />
+          )}
         </div>
         <div>
           <input
@@ -68,7 +91,7 @@ const TasksContainer = ({ task, createTask, removeTask }) => {
       </div>
       <div
         className="w-8 h-8 aligns-self-center"
-        onClick={() => removeTask(uniqueId)}>
+        onClick={() => removeTask(task.id.toString())}>
         <span className="w-1/2">
           <CloseIcon fill="gray" />
         </span>
