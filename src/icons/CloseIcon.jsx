@@ -1,6 +1,4 @@
-import React from 'react';
-
-function CloseIcon(props: React.SVGProps<SVGSVGElement>) {
+function CloseIcon(props) {
   const { fill } = props;
   return (
     <svg

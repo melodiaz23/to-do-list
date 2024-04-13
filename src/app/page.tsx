@@ -17,20 +17,32 @@ import {
   verticalListSortingStrategy,
   arrayMove,
 } from '@dnd-kit/sortable';
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { v4 as uuidv4 } from 'uuid'; // Generate unique IDs
 import Done from '../components/Done';
 import TasksContainer from '../components/TasksContainer';
+import CloseIcon from '@/icons/CloseIcon';
+import CalendarDaysIcon from '@/icons/CalendarDaysIcon';
+import DatePicker from '../components/Datepicker';
+import ReactDOM from 'react-dom';
 
 export default function Home() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [inputField, setInputField] = useState(false);
+  const [adding, setAdding] = useState(false);
   const [tasksDone, settasksDone] = useState([]);
-  // const taskId = useMemo(() => {
-  //   tasks.map((task) => task.id);
-  // }, [tasks]);
+
+  const removeInputField = () => {
+    if (inputField) setInputField(false);
+  };
+
+  // REMOVE INPUT FIELD WHEN CLICKED OUTSIDE
+  // useEffect(() => {
+  //   document.body.addEventListener('click', removeInputField);
+  //   return () => document.body.removeEventListener('click', removeInputField);
+  // }, []);
 
   // ACTIVE CARD
   const [activeCard, setActiveCard] = useState<Task | null>(null);
@@ -143,20 +155,40 @@ export default function Home() {
                         action=""
                         name="task"
                         className="grid gap-2">
-                        {inputField && (
-                          <div className="flex justify-between text-white bg-[#32a88b] shadow-lg text-base  px-4 py-1.5 rounded-lg w-full leading-7">
-                            <div className="w-full">
-                              <input
-                                type="text"
-                                placeholder="Task name"
-                                className="w-full border-0 bg-[#32a88b] text-white border-[#32a88b] outline-0 placeholder:text-gray-100"
-                                autoFocus
-                                value={inputValue}
-                                onChange={(e) => setInputValue(e.target.value)}
-                              />
+                        {(inputField || adding) && (
+                          <div className="flex items-center">
+                            <div className="flex justify-between text-white bg-[#32a88b] shadow-lg text-base  px-4 py-1.5 rounded-lg w-full leading-7">
+                              <div className="w-full">
+                                <input
+                                  type="text"
+                                  placeholder="Task name"
+                                  className="w-full border-0 bg-[#32a88b] text-white border-[#32a88b] outline-0 placeholder:text-gray-100"
+                                  autoFocus
+                                  value={inputValue}
+                                  onChange={(e) =>
+                                    setInputValue(e.target.value)
+                                  }
+                                />
+                              </div>
+                              <div className="flex items-center">
+                                <div className="relative">
+                                  <div className="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
+                                    <CalendarDaysIcon fill="black" />
+                                  </div>
+                                  <DatePicker />
+                                </div>
+                              </div>
+                            </div>
+                            <div
+                              className="w-8 h-8 aligns-self-center"
+                              onClick={() => setInputField(false)}>
+                              <span className="w-1/2">
+                                <CloseIcon fill="gray" />
+                              </span>
                             </div>
                           </div>
                         )}
+
                         <div className="flex justify-between text-white bg-[#32a88b] shadow-lg text-base  px-4 py-1.5 rounded-lg w-full leading-7">
                           <div className="w-full">
                             <button
@@ -165,6 +197,7 @@ export default function Home() {
                                 e.preventDefault();
                                 inputValue && createTask(e, inputValue);
                                 setInputField(true);
+                                setAdding(!adding);
                                 setInputValue('');
                               }}>
                               Add a new task +
@@ -198,7 +231,7 @@ export default function Home() {
             Guardar cambios
           </button>
         </div>
-        {createPortal(
+        {ReactDOM.createPortal(
           <DragOverlay>
             {activeCard && (
               <TasksContainer

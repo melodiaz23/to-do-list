@@ -4,8 +4,10 @@ import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
 import { useDraggable } from '@dnd-kit/core';
-import CloseIcon from '@/icons/Close';
+import CloseIcon from '@/icons/CloseIcon';
+import CalendarDaysIcon from '@/icons/CalendarDaysIcon';
 import { Task } from '@/types';
+import DatePicker from './Datepicker';
 
 interface TaskContainerProps {
   task: Task;
@@ -52,7 +54,7 @@ const TasksContainer = (props: TaskContainerProps) => {
   }
 
   return (
-    <div className="flex">
+    <div className="flex items-center">
       <div
         className="relative flex text-white bg-[#32a88b] shadow-lg text-base  px-4 py-1.5 rounded-lg w-full leading-7 cursor-grab"
         ref={setNodeRef}
@@ -67,7 +69,7 @@ const TasksContainer = (props: TaskContainerProps) => {
               className="w-full border-0 bg-[#32a88b] text-white border-[#32a88b] outline-0 placeholder:text-gray-100"
               type="text"
               autoFocus
-              value={task.task} // Fix error with value not changing
+              value={task.task}
               onChange={(e) => {
                 updateTask(task.id.toString(), e.target.value);
               }}
@@ -79,14 +81,8 @@ const TasksContainer = (props: TaskContainerProps) => {
             />
           )}
         </div>
-        <div>
-          <input
-            className="w-full border-0 bg-[#32a88b] text-white border-[#32a88b] outline-0"
-            type="date"
-            id="due-date"
-            placeholder="Choose a due date"
-            required
-          />
+        <div className="flex items-center">
+          <DatePicker />
         </div>
       </div>
       <div
