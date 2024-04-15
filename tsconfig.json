@@ -26,7 +26,8 @@
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts",
-    "src/icons/Close.jsx"
+    "src/icons/Close.jsx",
+    "src/components/OutsideListener.jsx"
   ],
   "exclude": ["node_modules"]
 }

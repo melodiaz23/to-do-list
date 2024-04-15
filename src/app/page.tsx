@@ -26,6 +26,7 @@ import CloseIcon from '@/icons/CloseIcon';
 import CalendarDaysIcon from '@/icons/CalendarDaysIcon';
 import DatePicker from '../components/Datepicker';
 import ReactDOM from 'react-dom';
+import { HtmlContext } from 'next/dist/server/future/route-modules/app-page/vendored/contexts/entrypoints';
 
 export default function Home() {
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -34,15 +35,32 @@ export default function Home() {
   const [adding, setAdding] = useState(false);
   const [tasksDone, settasksDone] = useState([]);
 
-  const removeInputField = () => {
-    if (inputField) setInputField(false);
+  const columnId = useMemo(() => uuidv4(), []);
+
+  const removeTask = (id: string) => {
+    setTasks(tasks.filter((task) => task.id !== id));
   };
 
   // REMOVE INPUT FIELD WHEN CLICKED OUTSIDE
-  // useEffect(() => {
-  //   document.body.addEventListener('click', removeInputField);
-  //   return () => document.body.removeEventListener('click', removeInputField);
-  // }, []);
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const lastTask = tasks.length > 0 ? tasks[tasks.length - 1] : null;
+      const lastTaskId = lastTask ? lastTask.id.toString() : null;
+      const target = event.target as HTMLElement;
+      if (String(target.className).includes('exception-element')) {
+        return;
+      }
+      if (lastTaskId && lastTask && lastTask.task === '') {
+        removeTask(lastTaskId);
+      }
+      setInputField(false);
+    };
+
+    document.body.addEventListener('click', handleClickOutside);
+    return () => {
+      document.body.removeEventListener('click', handleClickOutside);
+    };
+  }, [tasks]);
 
   // ACTIVE CARD
   const [activeCard, setActiveCard] = useState<Task | null>(null);
@@ -60,23 +78,28 @@ export default function Home() {
     inputValue?: string,
     index?: number
   ) => {
-    const newTask: Task = { id: uuidv4(), task: inputValue || '' };
-    // if (index === tasks.length - 1 || event.type === 'click') {
-    setTasks([...tasks, newTask]);
-    // }
+    const newTask: Task = {
+      id: uuidv4(),
+      columnId: columnId,
+      task: inputValue || '',
+    };
+    if (inputField && tasks[tasks.length - 1].task === '') {
+      console.log('CANT CREATE TASK');
+      return;
+    } else {
+      setTasks([...tasks, newTask]);
+      setInputField(true);
+    }
+    // setTasks([...tasks, newTask]);
   };
 
   const updateTask = (id: Id, taskValue: string) => {
     const updateTasks = tasks.map((task) => {
-      if (task.id !== id) return { id: task.id, task: task.task };
-
-      return { id: task.id, task: taskValue };
+      if (task.id !== id)
+        return { id: task.id, columnId: task.columnId, task: task.task };
+      return { id: task.id, columnId: task.columnId, task: taskValue };
     });
     setTasks(updateTasks);
-  };
-
-  const removeTask = (id: string) => {
-    setTasks(tasks.filter((task) => task.id !== id));
   };
 
   // DRAG AND DROP
@@ -145,8 +168,11 @@ export default function Home() {
                             <TasksContainer
                               key={task.id}
                               task={task}
+                              createTask={createTask}
                               updateTask={updateTask}
                               removeTask={removeTask}
+                              setInputField={setInputField}
+                              lastElement={idx === tasks.length - 1}
                             />
                           );
                         })}
@@ -155,49 +181,16 @@ export default function Home() {
                         action=""
                         name="task"
                         className="grid gap-2">
-                        {(inputField || adding) && (
-                          <div className="flex items-center">
-                            <div className="flex justify-between text-white bg-[#32a88b] shadow-lg text-base  px-4 py-1.5 rounded-lg w-full leading-7">
-                              <div className="w-full">
-                                <input
-                                  type="text"
-                                  placeholder="Task name"
-                                  className="w-full border-0 bg-[#32a88b] text-white border-[#32a88b] outline-0 placeholder:text-gray-100"
-                                  autoFocus
-                                  value={inputValue}
-                                  onChange={(e) =>
-                                    setInputValue(e.target.value)
-                                  }
-                                />
-                              </div>
-                              <div className="flex items-center">
-                                <div className="relative">
-                                  <div className="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
-                                    <CalendarDaysIcon fill="black" />
-                                  </div>
-                                  <DatePicker />
-                                </div>
-                              </div>
-                            </div>
-                            <div
-                              className="w-8 h-8 aligns-self-center"
-                              onClick={() => setInputField(false)}>
-                              <span className="w-1/2">
-                                <CloseIcon fill="gray" />
-                              </span>
-                            </div>
-                          </div>
-                        )}
-
                         <div className="flex justify-between text-white bg-[#32a88b] shadow-lg text-base  px-4 py-1.5 rounded-lg w-full leading-7">
                           <div className="w-full">
                             <button
                               className="w-full border-0 bg-[#32a88b] text-white border-[#32a88b] outline-0 placeholder:text-gray-100"
                               onClick={(e: React.MouseEvent) => {
                                 e.preventDefault();
-                                inputValue && createTask(e, inputValue);
-                                setInputField(true);
+                                // inputValue &&
+                                createTask(e, inputValue);
                                 setAdding(!adding);
+                                setInputField(true);
                                 setInputValue('');
                               }}>
                               Add a new task +
@@ -236,8 +229,11 @@ export default function Home() {
             {activeCard && (
               <TasksContainer
                 task={activeCard}
+                createTask={createTask}
                 updateTask={updateTask}
-                removeTask={removeTask}></TasksContainer>
+                removeTask={removeTask}
+                setInputField={setInputField}
+                lastElement={false}></TasksContainer>
             )}
           </DragOverlay>,
           document.body

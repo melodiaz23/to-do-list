@@ -11,12 +11,22 @@ import DatePicker from './Datepicker';
 
 interface TaskContainerProps {
   task: Task;
+  createTask: (event: React.MouseEvent | React.KeyboardEvent) => void;
   removeTask: (id: string) => void;
   updateTask: (id: string, task: string) => void;
+  setInputField: (value: boolean) => void;
+  lastElement: boolean;
 }
 
 const TasksContainer = (props: TaskContainerProps) => {
-  const { task, updateTask, removeTask } = props;
+  const {
+    task,
+    createTask,
+    updateTask,
+    removeTask,
+    setInputField,
+    lastElement,
+  } = props;
 
   const [editMode, setEditMode] = useState(false);
 
@@ -54,7 +64,7 @@ const TasksContainer = (props: TaskContainerProps) => {
   }
 
   return (
-    <div className="flex items-center">
+    <div className="flex items-center exception-element">
       <div
         className="relative flex text-white bg-[#32a88b] shadow-lg text-base  px-4 py-1.5 rounded-lg w-full leading-7 cursor-grab"
         ref={setNodeRef}
@@ -62,14 +72,38 @@ const TasksContainer = (props: TaskContainerProps) => {
         {...attributes}
         {...listeners}
         onClick={() => setEditMode(true)}>
-        <div className="w-full">
-          {!editMode && task.task}
+        <div className="w-full exception-element">
+          {!editMode &&
+            (task.task !== ''
+              ? task.task
+              : (setEditMode(true),
+                (
+                  <div>
+                    <input
+                      className="w-full border-0 bg-[#32a88b] text-white border-[#32a88b] outline-0 placeholder:text-gray-100 "
+                      type="text"
+                      autoFocus
+                      value={task.task ? task.task : ''}
+                      onChange={(e) => {
+                        updateTask(task.id.toString(), e.target.value);
+                      }}
+                      onBlur={() => setEditMode(false)}
+                      onKeyDown={(e) => {
+                        if (e.key !== 'Enter') return;
+                        setEditMode(false);
+                        setInputField(false);
+                        createTask(e);
+                      }}
+                    />
+                  </div>
+                )))}
+
           {editMode && (
             <input
-              className="w-full border-0 bg-[#32a88b] text-white border-[#32a88b] outline-0 placeholder:text-gray-100"
+              className="w-full border-0 bg-[#32a88b] text-white border-[#32a88b] outline-0 placeholder:text-gray-100 "
               type="text"
               autoFocus
-              value={task.task}
+              value={task.task ? task.task : ''}
               onChange={(e) => {
                 updateTask(task.id.toString(), e.target.value);
               }}
@@ -77,6 +111,8 @@ const TasksContainer = (props: TaskContainerProps) => {
               onKeyDown={(e) => {
                 if (e.key !== 'Enter') return;
                 setEditMode(false);
+                setInputField(false);
+                createTask(e);
               }}
             />
           )}
@@ -85,6 +121,7 @@ const TasksContainer = (props: TaskContainerProps) => {
           <DatePicker />
         </div>
       </div>
+
       <div
         className="w-8 h-8 aligns-self-center"
         onClick={() => removeTask(task.id.toString())}>
