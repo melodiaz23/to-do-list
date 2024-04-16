@@ -6,7 +6,7 @@ import { v4 as uuidv4 } from 'uuid'; // Generate unique IDs
 import { Task } from '@/types';
 
 export default function Home() {
-  const [tasks, setTasks] = useState<Task[]>([]);
+  // const [tasks, setTasks] = useState<Task[]>([]);
 
   const todoId = uuidv4();
   const doneId = uuidv4();

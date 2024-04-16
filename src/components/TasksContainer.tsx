@@ -35,6 +35,7 @@ interface TaskContainerProps {
 }
 
 export default function TasksContainer(props: TaskContainerProps) {
+  // const { type, tasks, setTasks } = props;
   const [tasks, setTasks] = useState<Task[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [inputField, setInputField] = useState(false);
