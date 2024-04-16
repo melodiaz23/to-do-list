@@ -28,7 +28,13 @@ import DatePicker from '../components/Datepicker';
 import ReactDOM from 'react-dom';
 import { HtmlContext } from 'next/dist/server/future/route-modules/app-page/vendored/contexts/entrypoints';
 
-export default function TasksContainer() {
+interface TaskContainerProps {
+  type: string;
+  // setTasks: React.Dispatch<React.SetStateAction<Task[]>>;
+  // tasks: Task[];
+}
+
+export default function TasksContainer(props: TaskContainerProps) {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [inputField, setInputField] = useState(false);
@@ -81,6 +87,7 @@ export default function TasksContainer() {
     const newTask: Task = {
       id: uuidv4(),
       columnId: columnId,
+      type: 'todo',
       task: inputValue || '',
     };
     if (inputField && tasks[tasks.length - 1].task === '') {
@@ -96,8 +103,18 @@ export default function TasksContainer() {
   const updateTask = (id: Id, taskValue: string) => {
     const updateTasks = tasks.map((task) => {
       if (task.id !== id)
-        return { id: task.id, columnId: task.columnId, task: task.task };
-      return { id: task.id, columnId: task.columnId, task: taskValue };
+        return {
+          id: task.id,
+          columnId: task.columnId,
+          type: task.type,
+          task: task.task,
+        };
+      return {
+        id: task.id,
+        columnId: task.columnId,
+        type: task.type,
+        task: taskValue,
+      };
     });
     setTasks(updateTasks);
   };

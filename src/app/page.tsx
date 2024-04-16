@@ -1,15 +1,15 @@
 'use client';
-
-import React, { useEffect, useMemo, useState } from 'react';
-
+import React from 'react';
+import { useState } from 'react';
 import TasksContainer from '../components/TasksContainer';
-
-import { Task } from '@/types';
 import { v4 as uuidv4 } from 'uuid'; // Generate unique IDs
-import { create } from 'domain';
+import { Task } from '@/types';
 
 export default function Home() {
-  // const [tasks, setTasks] = useState<Task[]>([]);
+  const [tasks, setTasks] = useState<Task[]>([]);
+
+  const todoId = uuidv4();
+  const doneId = uuidv4();
 
   return (
     <div className="grid grid-rows-[auto_1fr] h-screen">
@@ -22,21 +22,21 @@ export default function Home() {
             <h2 className="text-xl font-semibold text-center p-4">To do</h2>
 
             <TasksContainer
-              key={uuidv4()}
-              // tasks={tasks}
               // setTasks={setTasks}
-              // type="todo"
+              // tasks={tasks}
+              key={todoId}
+              type="todo"
             />
           </div>
           <div>
             <h2 className="text-xl font-semibold text-center p-4">Done</h2>
-            {/* 
+
             <TasksContainer
-              key={uuidv4()}
-              tasks={tasks}
-              setTasks={setTasks}
+              // setTasks={setTasks}
+              // tasks={tasks}
+              key={doneId}
               type="done"
-            /> */}
+            />
           </div>
         </div>
         <button className="text-white bg-[#32a88b] hover:bg-sky-600 shadow-lg text-base  px-4 py-1.5 rounded-lg w-44 justify-self-end leading-7">
