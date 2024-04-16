@@ -21,7 +21,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { v4 as uuidv4 } from 'uuid'; // Generate unique IDs
 import Done from '../components/Done';
-import TasksContainer from '../components/TasksContainer';
+import Tasks from '../components/Tasks';
 import CloseIcon from '@/icons/CloseIcon';
 import CalendarDaysIcon from '@/icons/CalendarDaysIcon';
 import DatePicker from '../components/Datepicker';
@@ -165,7 +165,7 @@ export default function Home() {
                         strategy={verticalListSortingStrategy}>
                         {tasks.map((task, idx) => {
                           return (
-                            <TasksContainer
+                            <Tasks
                               key={task.id}
                               task={task}
                               createTask={createTask}
@@ -227,13 +227,13 @@ export default function Home() {
         {ReactDOM.createPortal(
           <DragOverlay>
             {activeCard && (
-              <TasksContainer
+              <Tasks
                 task={activeCard}
                 createTask={createTask}
                 updateTask={updateTask}
                 removeTask={removeTask}
                 setInputField={setInputField}
-                lastElement={false}></TasksContainer>
+                lastElement={false}></Tasks>
             )}
           </DragOverlay>,
           document.body
