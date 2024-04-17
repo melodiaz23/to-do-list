@@ -73,51 +73,33 @@ const Tasks = (props: TasksProps) => {
         {...listeners}
         onClick={() => setEditMode(true)}>
         <div className="w-full exception-element">
-          {!editMode &&
-            (task.task !== ''
-              ? task.task
-              : (setEditMode(true),
-                (
-                  <div>
-                    <input
-                      className="w-full border-0 bg-[#32a88b] text-white border-[#32a88b] outline-0 placeholder:text-gray-100 exception-element "
-                      type="text"
-                      autoFocus
-                      value={task.task ? task.task : ''}
-                      onChange={(e) => {
-                        updateTask(task.id.toString(), e.target.value);
-                      }}
-                      onBlur={() => setEditMode(false)}
-                      onKeyDown={(e) => {
-                        if (e.key !== 'Enter') return;
-                        setEditMode(false);
-                        setInputField(false);
-                        createTask(e);
-                      }}
-                    />
-                  </div>
-                )))}
+          <div>
+            {!editMode &&
+              (task.task !== ''
+                ? task.task
+                : (setEditMode(true), (<div></div>)))}
 
-          {editMode && (
-            <input
-              className="w-full border-0 bg-[#32a88b] text-white border-[#32a88b] outline-0 placeholder:text-gray-100 exception-element"
-              type="text"
-              autoFocus
-              value={task.task ? task.task : ''}
-              onChange={(e) => {
-                updateTask(task.id.toString(), e.target.value);
-              }}
-              onBlur={() => setEditMode(false)}
-              onKeyDown={(e) => {
-                if (e.key !== 'Enter') return;
-                setEditMode(false);
-                setInputField(false);
-                createTask(e);
-              }}
-            />
-          )}
+            {editMode && (
+              <input
+                className="w-full border-0 bg-[#32a88b] text-white border-[#32a88b] outline-0 placeholder:text-gray-100 exception-element"
+                type="text"
+                autoFocus
+                value={task.task ? task.task : ''}
+                onChange={(e) => {
+                  updateTask(task.id.toString(), e.target.value);
+                }}
+                onBlur={() => setEditMode(false)}
+                onKeyDown={(e) => {
+                  if (e.key !== 'Enter') return;
+                  setEditMode(false);
+                  setInputField(false);
+                  createTask(e);
+                }}
+              />
+            )}
+          </div>
         </div>
-        <div className="flex items-center">
+        <div className="flex items-center exception-element">
           <DatePicker />
         </div>
       </div>

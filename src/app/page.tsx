@@ -4,6 +4,7 @@ import { useState } from 'react';
 import TasksContainer from '../components/TasksContainer';
 import { v4 as uuidv4 } from 'uuid'; // Generate unique IDs
 import { Task } from '@/types';
+import DatePicker from '@/components/Datepicker';
 
 export default function Home() {
   // const [tasks, setTasks] = useState<Task[]>([]);
@@ -39,9 +40,9 @@ export default function Home() {
             />
           </div>
         </div>
-        <button className="text-white bg-[#32a88b] hover:bg-sky-600 shadow-lg text-base  px-4 py-1.5 rounded-lg w-44 justify-self-end leading-7">
+        {/* <button className="text-white bg-[#32a88b] hover:bg-sky-600 shadow-lg text-base  px-4 py-1.5 rounded-lg w-44 justify-self-end leading-7">
           Guardar cambios
-        </button>
+        </button> */}
       </div>
     </div>
   );

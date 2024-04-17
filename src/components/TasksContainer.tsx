@@ -48,26 +48,26 @@ export default function TasksContainer(props: TaskContainerProps) {
     setTasks(tasks.filter((task) => task.id !== id));
   };
 
-  // REMOVE INPUT FIELD WHEN CLICKED OUTSIDE
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      const lastTask = tasks.length > 0 ? tasks[tasks.length - 1] : null;
-      const lastTaskId = lastTask ? lastTask.id.toString() : null;
-      const target = event.target as HTMLElement;
-      if (String(target.className).includes('exception-element')) {
-        return;
-      }
-      if (lastTaskId && lastTask && lastTask.task === '') {
-        removeTask(lastTaskId);
-      }
-      setInputField(false);
-    };
+  // // REMOVE INPUT FIELD WHEN CLICKED OUTSIDE
+  // useEffect(() => {
+  //   const handleClickOutside = (event: MouseEvent) => {
+  //     const lastTask = tasks.length > 0 ? tasks[tasks.length - 1] : null;
+  //     const lastTaskId = lastTask ? lastTask.id.toString() : null;
+  //     const target = event.target as HTMLElement;
+  //     if (String(target.classList.contains('.exception-element'))) {
+  //       return;
+  //     }
+  //     if (lastTaskId && lastTask && lastTask.task === '') {
+  //       removeTask(lastTaskId);
+  //     }
+  //     setInputField(false);
+  //   };
 
-    document.body.addEventListener('click', handleClickOutside);
-    return () => {
-      document.body.removeEventListener('click', handleClickOutside);
-    };
-  }, [tasks]);
+  //   document.body.addEventListener('click', handleClickOutside);
+  //   return () => {
+  //     document.body.removeEventListener('click', handleClickOutside);
+  //   };
+  // }, [tasks]);
 
   // ACTIVE CARD
   const [activeCard, setActiveCard] = useState<Task | null>(null);
@@ -91,7 +91,7 @@ export default function TasksContainer(props: TaskContainerProps) {
       type: 'todo',
       task: inputValue || '',
     };
-    if (inputField && tasks[tasks.length - 1].task === '') {
+    if (tasks.length > 0 && inputField && tasks[tasks.length - 1].task === '') {
       console.log('CANT CREATE TASK');
       return;
     } else {
