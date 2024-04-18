@@ -4,7 +4,7 @@ import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
 import { useDraggable } from '@dnd-kit/core';
-import CloseIcon from '@/icons/CloseIcon';
+import TrashIcon from '@/icons/TrashIcon';
 import CalendarDaysIcon from '@/icons/CalendarDaysIcon';
 import { Task } from '@/types';
 import DatePicker from './Datepicker';
@@ -103,13 +103,10 @@ const Tasks = (props: TasksProps) => {
           <DatePicker />
         </div>
       </div>
-
       <div
-        className="w-8 h-8 aligns-self-center"
+        className=" aligns-self-center aligns-items-center"
         onClick={() => removeTask(task.id.toString())}>
-        <span className="w-1/2">
-          <CloseIcon fill="gray" />
-        </span>
+        <TrashIcon fill="gray" />
       </div>
     </div>
   );
