@@ -49,7 +49,9 @@ const DatePicker = () => {
   return (
     <div className="flex items-center relative">
       <Datetime
-        onChange={(selectedDate) => handleDateChange(selectedDate)}
+        onChange={(selectedDate) =>
+          handleDateChange(selectedDate as unknown as Date)
+        }
         closeOnSelect
         value={selectedDate}
         input={true}
@@ -58,9 +60,9 @@ const DatePicker = () => {
         inputProps={inputProps}
         className="appearance-none rounded text-gray-700 text-base ring-green-400 focus:ring-none"
       />
-      <span className="h-full text-gray-700 absolute right-0 top-0">
-        <CalendarDaysIcon fill="white" />
-      </span>
+      <div className="h-full text-gray-700 absolute right-0 top-0">
+        <CalendarDaysIcon fill="black" />
+      </div>
     </div>
   );
 };
