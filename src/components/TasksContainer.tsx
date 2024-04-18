@@ -38,7 +38,7 @@ export default function TasksContainer(props: TaskContainerProps) {
   // const { type, tasks, setTasks } = props;
   const [tasks, setTasks] = useState<Task[]>([]);
   const [inputValue, setInputValue] = useState('');
-  const [inputField, setInputField] = useState(false);
+  const [inputField, setInputField] = useState(false); // Input field state when creating new task
   const [adding, setAdding] = useState(false);
   const [tasksDone, settasksDone] = useState([]);
 
@@ -180,7 +180,7 @@ export default function TasksContainer(props: TaskContainerProps) {
                         createTask={createTask}
                         updateTask={updateTask}
                         removeTask={removeTask}
-                        setInputField={setInputField}
+                        // setInputField={setInputField}
                         lastElement={idx === tasks.length - 1}
                       />
                     );
@@ -220,7 +220,7 @@ export default function TasksContainer(props: TaskContainerProps) {
                 createTask={createTask}
                 updateTask={updateTask}
                 removeTask={removeTask}
-                setInputField={setInputField}
+                // setInputField={setInputField}
                 lastElement={false}></Tasks>
             )}
           </DragOverlay>,
