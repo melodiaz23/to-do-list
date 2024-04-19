@@ -5,4 +5,5 @@ export type Task = {
   columnId: Id;
   type: string;
   task: string | null;
+  dueDate: Date | null;
 };

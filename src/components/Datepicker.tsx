@@ -13,10 +13,9 @@ const DatePicker = () => {
       border: 'none',
       color: 'white',
       width: '100%',
-      '&:focus': {
-        backgroundColor: 'red',
-        outline: 'none',
-      },
+    },
+    onClick: () => {
+      console.log('click');
     },
   };
 
@@ -37,7 +36,7 @@ const DatePicker = () => {
           dateFormat="DD/MM/YYYY"
           timeFormat={false}
           inputProps={inputProps}
-          className="appearance-none rounded text-gray-700 text-base ring-green-400 focus:ring-none"
+          className="appearance-none rounded text-gray-700 text-base outline-none focus:outline-none focus:ring-none"
         />
         <div className="h-full text-gray-700 absolute right-0 top-0">
           <CalendarDaysIcon fill="white" />

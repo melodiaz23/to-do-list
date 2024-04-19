@@ -13,7 +13,7 @@ interface TasksProps {
   task: Task;
   createTask: (event: React.MouseEvent | React.KeyboardEvent) => void;
   removeTask: (id: string) => void;
-  updateTask: (id: string, task: string) => void;
+  updateTask: (id: string, task: string, dueDate: Date | null) => void;
   // setInputField: (value: boolean) => void;
   lastElement: boolean;
 }
@@ -64,15 +64,15 @@ const Tasks = (props: TasksProps) => {
   }
 
   return (
-    <div className="flex items-center exception-element">
+    <div className="flex w-full justify-between align-items-center">
       <div
-        className="relative flex text-white bg-[#32a88b] shadow-lg text-base  px-4 py-1.5 rounded-lg w-full leading-7 cursor-grab"
+        className="flex w-full  relative justify-self-stretch text-white bg-[#32a88b] shadow-lg text-base  px-4 py-1.5 rounded-lg leading-7 cursor-grab"
         ref={setNodeRef}
         style={style}
         {...attributes}
         {...listeners}
         onClick={() => setEditMode(true)}>
-        <div className="w-full exception-element">
+        <div className="w-full ">
           <div>
             {!editMode &&
               (task.task !== ''
@@ -80,38 +80,44 @@ const Tasks = (props: TasksProps) => {
                 : (setEditMode(true), (<div></div>)))}
 
             {editMode && (
-              <input
-                className="w-full border-0 bg-[#32a88b] text-white border-[#32a88b] outline-0 placeholder:text-gray-100 exception-element"
-                type="text"
-                autoFocus
-                value={task.task ? task.task : ''}
-                onChange={(e) => {
-                  updateTask(task.id.toString(), e.target.value);
-                }}
-                onBlur={(e) => {
-                  setEditMode(false);
-                  if (task.task === '') {
-                    removeTask(task.id.toString());
-                  }
-                }}
-                onKeyDown={(e) => {
-                  if (e.key !== 'Enter') return;
-                  setEditMode(false);
-                  // setInputField(false);
-                  createTask(e);
-                }}
-              />
+              <>
+                <input
+                  className="w-full border-0 bg-[#32a88b] text-white border-[#32a88b] outline-0 placeholder:text-gray-100"
+                  type="text"
+                  id="due-date"
+                  autoFocus
+                  value={task.task ? task.task : ''}
+                  onChange={(e) => {
+                    updateTask(task.id.toString(), e.target.value, null);
+                  }}
+                  onBlur={(e) => {
+                    setEditMode(false);
+                    if (task.task === '' && lastElement) {
+                      removeTask(task.id.toString());
+                    }
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key !== 'Enter') return;
+                    setEditMode(false);
+                    // setInputField(false);
+                    createTask(e);
+                  }}
+                />
+              </>
             )}
           </div>
         </div>
-        <div className="flex items-center exception-element">
+        <div className="flex items-center">
           <DatePicker />
         </div>
       </div>
+
       <div
-        className=" aligns-self-center aligns-items-center"
+        className="flex justify-center items-center cursor-pointer "
+        // hidden={!editMode || (task.task === '' && lastElement)}
         onClick={() => removeTask(task.id.toString())}>
         {/* <TrashIcon fill="gray" /> */}
+
         <svg
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
