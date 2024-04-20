@@ -17,6 +17,7 @@ import {
   horizontalListSortingStrategy,
   verticalListSortingStrategy,
   arrayMove,
+  useSortable,
 } from '@dnd-kit/sortable';
 import React, { useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
@@ -28,6 +29,8 @@ import CalendarDaysIcon from '@/icons/CalendarDaysIcon';
 import DatePicker from '../components/Datepicker';
 import ReactDOM from 'react-dom';
 import { HtmlContext } from 'next/dist/server/future/route-modules/app-page/vendored/contexts/entrypoints';
+import { type } from 'os';
+import { CSS } from '@dnd-kit/utilities';
 
 interface TaskContainerProps {
   type: string;
@@ -36,17 +39,40 @@ interface TaskContainerProps {
 }
 
 export default function TasksContainer(props: TaskContainerProps) {
-  // const { type, tasks, setTasks } = props;
+  const { type } = props;
   const [tasks, setTasks] = useState<Task[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [inputField, setInputField] = useState(false); // Input field state when creating new task
   const [adding, setAdding] = useState(false);
   const [tasksDone, setTasksDone] = useState([]);
 
+  const [enableAddBtn, setEnableAddBtn] = useState(true);
+
   const columnId = useMemo(() => uuidv4(), []);
 
   const removeTask = (id: string) => {
     setTasks(tasks.filter((task) => task.id !== id));
+  };
+
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({
+    id: type,
+    data: {
+      type: 'task-contaimer',
+    },
+    disabled: enableAddBtn, // Disable dragging if a task is being added
+  });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    // cursor: isDragging ? 'grabbing' : 'pointer', // Change cursor when dragging
   };
 
   // ACTIVE CARD
@@ -73,13 +99,13 @@ export default function TasksContainer(props: TaskContainerProps) {
       task: inputValue || '',
       dueDate: null,
     };
-    // if (tasks.length > 0 && inputField && tasks[tasks.length - 1].task === '') {
-    //   console.log('CANT CREATE TASK');
-    //   return;
-    // } else {
-    setTasks([...tasks, newTask]);
-    setInputField(true);
-    // }
+    if (tasks.length > 0 && tasks[tasks.length - 1].task === '') {
+      console.log('CANT CREATE TASK');
+      return;
+    } else {
+      setTasks([...tasks, newTask]);
+      setInputField(true);
+    }
   };
 
   const updateTask = (id: Id, taskValue: string, dueDate: Date | null) => {
@@ -105,15 +131,16 @@ export default function TasksContainer(props: TaskContainerProps) {
 
   // DRAG AND DROP
   const onDragStart = (event: DragStartEvent) => {
-    if (event.active.data.current?.type === 'task-container') {
+    console.log(event);
+    if (event.active.data.current?.type === 'task') {
       setActiveCard(event.active.data.current.task);
       return;
     }
   };
 
   const onDragEnd = (event: DragEndEvent) => {
+    console.log(event);
     setActiveCard(null);
-    // setTasksDone(null);
 
     const { active, over } = event;
 
@@ -153,35 +180,71 @@ export default function TasksContainer(props: TaskContainerProps) {
     const isActiveTask = active.data.current?.type === 'task-container';
     const isOverTask = over.data.current?.type === 'task-container';
 
+    if (!isActiveTask && !isOverTask) {
+      return;
+    }
+
+    console.log(active.data.current?.type, over.data.current?.type);
+
+    // Droping within the TODO list
+
     if (isActiveTask && isOverTask) {
       setTasks((tasks) => {
+        // to find the index
         const activeIndex = tasks.findIndex((task) => task.id === activeTaskId);
         const overIndex = tasks.findIndex((task) => task.id === overTaskId);
 
-        tasks[activeIndex].columnId = tasks[overIndex].columnId;
+        // to change the type
+        tasks[overIndex].type = tasks[activeIndex].type;
 
         return arrayMove(tasks, activeIndex, overIndex);
       });
     }
-    // Droping within the TODO list
+
+    // const isActiveTask = active.data.current?.type === 'task'
+    // const isOverTask = over.data.current?.type === 'task'
+
+    // if (isActiveTask && isOverTask) {
+    //   setTasks((tasks) => {
+    //     const activeIndex = tasks.findIndex((task) => task.id === activeTaskId);
+    //     const overIndex = tasks.findIndex((task) => task.id === overTaskId);
+    //     return arrayMove(tasks, activeIndex, overIndex);
+    //   });
+    // }
 
     // Droping to a DONE list
+    const isOverDone = over.data.current?.type === 'done';
 
-    // if (active.data.current?.type === 'task-container') {
-    //   if (over.data.current?.type === 'task-container') {
-    //     return;
-    //   }
-    //   if (over.data.current?.type === 'done') {
-    //     setTasksDone([...tasksDone, active.data.current?.task]);
-    //     setTasks((tasks) =>
-    //       tasks.filter((task) => task.id !== active.data.current?.task.id)
-    //     );
-    //   }
+    // if (isActiveTask && isOverDone) {
+    //   setTasks((tasks) => {
+    //     // to find the index
+    //     const activeIndex = tasks.findIndex((task) => task.id === activeTaskId);
+
+    //     // to change the type
+    //     tasks[overIndex].type = over.type
+
+    //     return arrayMove(tasks, activeIndex, overIndex);
+    //   });
     // }
   };
 
+  if (isDragging) {
+    return (
+      <div
+        className="relative flex text-white bg-[#32a88b] shadow-lg text-base opacity-60 border-2 border-rose-300 h-10 px-4 py-1.5 rounded-lg w-full leading-7 cursor-grab"
+        ref={setNodeRef}
+        style={style}
+        {...attributes}
+        {...listeners}></div>
+    );
+  }
+
   return (
-    <div>
+    <div
+      ref={setNodeRef}
+      style={style}
+      {...attributes}
+      {...listeners}>
       <DndContext
         collisionDetection={closestCenter}
         onDragStart={onDragStart}
@@ -190,10 +253,12 @@ export default function TasksContainer(props: TaskContainerProps) {
         sensors={sensors}
         id="instanceId">
         <div className=" bg-white rounded-lg p-5 mb-4 shadow-md text-[#545454]">
-          <div className="grid grid-cols-2 pb-2">
-            <div className="w-2/3 justify-self-center">Task</div>
-            <div className="w-1/3 justify-self-center">Due Date</div>
-          </div>
+          <span style={{ display: type === 'done' ? 'none' : 'block' }}>
+            <div className="grid grid-cols-2 pb-2">
+              <div className="w-2/3 justify-self-center">Task</div>
+              <div className="w-1/3 justify-self-center">Due Date</div>
+            </div>
+          </span>
 
           <div className="grid gap-2">
             <SortableContext
@@ -208,32 +273,12 @@ export default function TasksContainer(props: TaskContainerProps) {
                     updateTask={updateTask}
                     removeTask={removeTask}
                     // setInputField={setInputField}
+                    setEnableAddBtn={setEnableAddBtn}
                     lastElement={idx === tasks.length - 1}
                   />
                 );
               })}
             </SortableContext>
-            <form
-              name="task"
-              id="task"
-              className="grid gap-2">
-              <div className="flex justify-between text-white bg-[#32a88b] shadow-lg text-base  px-4 py-1.5 rounded-lg w-full leading-7">
-                <div className="w-full">
-                  <button
-                    className="w-full border-0 bg-[#32a88b] text-white border-[#32a88b] outline-0 placeholder:text-gray-100"
-                    onClick={(e: React.MouseEvent) => {
-                      e.preventDefault();
-                      // inputValue &&
-                      createTask(e, inputValue);
-                      setAdding(!adding);
-                      setInputField(true);
-                      setInputValue('');
-                    }}>
-                    Add a new task +
-                  </button>
-                </div>
-              </div>
-            </form>
           </div>
         </div>
 
@@ -246,12 +291,35 @@ export default function TasksContainer(props: TaskContainerProps) {
                 updateTask={updateTask}
                 removeTask={removeTask}
                 // setInputField={setInputField}
+                setEnableAddBtn={setEnableAddBtn}
                 lastElement={false}></Tasks>
             )}
           </DragOverlay>,
           document.body
         )}
       </DndContext>
+      <form
+        name="task"
+        id="task"
+        className="grid gap-2"
+        style={{ display: type === 'done' ? 'none' : 'block' }}>
+        <div className="flex justify-between text-white bg-[#32a88b] shadow-lg text-base  px-4 py-1.5 rounded-lg w-full leading-7">
+          <div className="w-full">
+            <button
+              className="w-full border-0 bg-[#32a88b] text-white border-[#32a88b] outline-0 placeholder:text-gray-100"
+              onClick={(e: React.MouseEvent) => {
+                e.preventDefault();
+                // inputValue &&
+                createTask(e, inputValue);
+                setAdding(!adding);
+                setInputField(true);
+                setInputValue('');
+              }}>
+              Add a new task +
+            </button>
+          </div>
+        </div>
+      </form>
     </div>
   );
 }

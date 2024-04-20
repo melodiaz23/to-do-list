@@ -16,6 +16,7 @@ interface TasksProps {
   updateTask: (id: string, task: string, dueDate: Date | null) => void;
   // setInputField: (value: boolean) => void;
   lastElement: boolean;
+  setEnableAddBtn: (value: boolean) => void;
 }
 
 const Tasks = (props: TasksProps) => {
@@ -26,9 +27,16 @@ const Tasks = (props: TasksProps) => {
     removeTask,
     // setInputField,
     lastElement,
+    setEnableAddBtn,
   } = props;
 
   const [editMode, setEditMode] = useState(false);
+
+  useEffect(() => {
+    if (isDragging) {
+      setEnableAddBtn(false);
+    }
+  });
 
   const {
     attributes,
@@ -40,7 +48,7 @@ const Tasks = (props: TasksProps) => {
   } = useSortable({
     id: task.id,
     data: {
-      type: 'task-container',
+      type: 'task',
       task,
     },
     disabled: editMode, // Disable dragging if in edit mode
