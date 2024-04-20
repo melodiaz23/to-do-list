@@ -48,7 +48,7 @@ const Tasks = (props: TasksProps) => {
   } = useSortable({
     id: task.id,
     data: {
-      type: 'task',
+      type: task.type,
       task,
     },
     disabled: editMode, // Disable dragging if in edit mode

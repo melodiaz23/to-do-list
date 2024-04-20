@@ -34,21 +34,26 @@ import { CSS } from '@dnd-kit/utilities';
 
 interface TaskContainerProps {
   type: string;
-  // setTasks: React.Dispatch<React.SetStateAction<Task[]>>;
-  // tasks: Task[];
+  columnId: Id;
+  setTasks: React.Dispatch<React.SetStateAction<Task[]>>;
+  tasks: Task[];
+  createTask: (
+    event: React.MouseEvent | React.KeyboardEvent,
+    inputValue?: string,
+    date?: Date,
+    index?: number
+  ) => void;
 }
 
 export default function TasksContainer(props: TaskContainerProps) {
-  const { type } = props;
-  const [tasks, setTasks] = useState<Task[]>([]);
+  const { type, columnId, setTasks, tasks, createTask } = props;
+  // const [tasks, setTasks] = useState<Task[]>([]);
   const [inputValue, setInputValue] = useState('');
-  const [inputField, setInputField] = useState(false); // Input field state when creating new task
-  const [adding, setAdding] = useState(false);
+  // const [inputField, setInputField] = useState(false); // Input field state when creating new task
+
   const [tasksDone, setTasksDone] = useState([]);
 
   const [enableAddBtn, setEnableAddBtn] = useState(true);
-
-  const columnId = useMemo(() => uuidv4(), []);
 
   const removeTask = (id: string) => {
     setTasks(tasks.filter((task) => task.id !== id));
@@ -62,9 +67,9 @@ export default function TasksContainer(props: TaskContainerProps) {
     transition,
     isDragging,
   } = useSortable({
-    id: type,
+    id: columnId,
     data: {
-      type: 'task-contaimer',
+      type: type,
     },
     disabled: enableAddBtn, // Disable dragging if a task is being added
   });
@@ -85,28 +90,6 @@ export default function TasksContainer(props: TaskContainerProps) {
       },
     })
   );
-
-  const createTask = (
-    event: React.MouseEvent | React.KeyboardEvent,
-    inputValue?: string,
-    date?: Date,
-    index?: number
-  ) => {
-    const newTask: Task = {
-      id: uuidv4(),
-      columnId: columnId,
-      type: 'todo',
-      task: inputValue || '',
-      dueDate: null,
-    };
-    if (tasks.length > 0 && tasks[tasks.length - 1].task === '') {
-      console.log('CANT CREATE TASK');
-      return;
-    } else {
-      setTasks([...tasks, newTask]);
-      setInputField(true);
-    }
-  };
 
   const updateTask = (id: Id, taskValue: string, dueDate: Date | null) => {
     const updateTasks = tasks.map((task) => {
@@ -132,7 +115,13 @@ export default function TasksContainer(props: TaskContainerProps) {
   // DRAG AND DROP
   const onDragStart = (event: DragStartEvent) => {
     console.log(event);
-    if (event.active.data.current?.type === 'task') {
+    // Dragging a card from another column
+    if (event.active.data.current?.type === 'todo') {
+      setActiveCard(event.active.data.current.task);
+      return;
+    }
+
+    if (event.active.data.current?.type === 'done') {
       setActiveCard(event.active.data.current.task);
       return;
     }
@@ -179,6 +168,7 @@ export default function TasksContainer(props: TaskContainerProps) {
 
     const isActiveTask = active.data.current?.type === 'task-container';
     const isOverTask = over.data.current?.type === 'task-container';
+    console.log(active.data.current?.type, over.data.current?.type);
 
     if (!isActiveTask && !isOverTask) {
       return;
@@ -200,17 +190,6 @@ export default function TasksContainer(props: TaskContainerProps) {
         return arrayMove(tasks, activeIndex, overIndex);
       });
     }
-
-    // const isActiveTask = active.data.current?.type === 'task'
-    // const isOverTask = over.data.current?.type === 'task'
-
-    // if (isActiveTask && isOverTask) {
-    //   setTasks((tasks) => {
-    //     const activeIndex = tasks.findIndex((task) => task.id === activeTaskId);
-    //     const overIndex = tasks.findIndex((task) => task.id === overTaskId);
-    //     return arrayMove(tasks, activeIndex, overIndex);
-    //   });
-    // }
 
     // Droping to a DONE list
     const isOverDone = over.data.current?.type === 'done';
@@ -245,6 +224,12 @@ export default function TasksContainer(props: TaskContainerProps) {
       style={style}
       {...attributes}
       {...listeners}>
+      {type === 'todo' && (
+        <h2 className="text-xl font-semibold text-center p-4">To do</h2>
+      )}
+      {type === 'done' && (
+        <h2 className="text-xl font-semibold text-center p-4">Done</h2>
+      )}
       <DndContext
         collisionDetection={closestCenter}
         onDragStart={onDragStart}
@@ -286,6 +271,7 @@ export default function TasksContainer(props: TaskContainerProps) {
           <DragOverlay>
             {activeCard && (
               <Tasks
+                key={activeCard.id}
                 task={activeCard}
                 createTask={createTask}
                 updateTask={updateTask}
@@ -298,28 +284,6 @@ export default function TasksContainer(props: TaskContainerProps) {
           document.body
         )}
       </DndContext>
-      <form
-        name="task"
-        id="task"
-        className="grid gap-2"
-        style={{ display: type === 'done' ? 'none' : 'block' }}>
-        <div className="flex justify-between text-white bg-[#32a88b] shadow-lg text-base  px-4 py-1.5 rounded-lg w-full leading-7">
-          <div className="w-full">
-            <button
-              className="w-full border-0 bg-[#32a88b] text-white border-[#32a88b] outline-0 placeholder:text-gray-100"
-              onClick={(e: React.MouseEvent) => {
-                e.preventDefault();
-                // inputValue &&
-                createTask(e, inputValue);
-                setAdding(!adding);
-                setInputField(true);
-                setInputValue('');
-              }}>
-              Add a new task +
-            </button>
-          </div>
-        </div>
-      </form>
     </div>
   );
 }
