@@ -15,15 +15,7 @@ import {
   useSensor,
   useSensors,
 } from '@dnd-kit/core';
-import {
-  arrayMove,
-  horizontalListSortingStrategy,
-  SortableContext,
-  useSortable,
-  verticalListSortingStrategy,
-} from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
-import { create } from 'domain';
+import { arrayMove } from '@dnd-kit/sortable';
 
 export default function Home() {
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -119,50 +111,6 @@ export default function Home() {
       over?.data.current?.sortable.containerId
     )
       return;
-
-    const containerName = active.data.current?.sortable.containerId;
-
-    // Change items based on drag end position
-
-    // setTasks((tasks) => {
-    //   // const tempTasks = { ...tasks };
-    //   // const oldIndex = tempTasks[containerName].indexOf(active.id.toString());
-    //   // const newIndex = tempTasks[containerName].indexOf(over?.id.toString());
-    //   // // tempTasks[containerName] = arrayMove(tempTasks[containerName], oldIndex, newIndex);
-    //   // // return tempTasks;
-    // });
-
-    // if (!over) {
-    //   return;
-    // }
-
-    // const activeTaskId = active.id;
-    // const overTaskId = over.id;
-
-    // if (activeTaskId === overTaskId) {
-    //   return;
-    // }
-
-    // setTasks((tasks) => {
-    //   const activeIndex = tasks.findIndex((task) => task.id === activeTaskId);
-    //   const overIndex = tasks.findIndex((task) => task.id === overTaskId);
-    //   return arrayMove(tasks, activeIndex, overIndex);
-    // });
-
-    // if (active.data.current?.type === 'done') {
-    //   createTask(
-    //     undefined,
-    //     active.data.current.task,
-    //     'done',
-    //     active.data.current.dueDate
-    //   );
-
-    //   setDone((done) => {
-    //     const activeIndex = done.findIndex((task) => task.id === activeTaskId);
-    //     const overIndex = done.findIndex((task) => task.id === overTaskId);
-    //     return arrayMove(done, activeIndex, overIndex);
-    //   });
-    // }
   };
 
   const onDragOver = (event: DragOverEvent) => {
@@ -175,28 +123,20 @@ export default function Home() {
 
     if (activeTaskId === overTaskId) return;
 
+    // Droping inside the TODO list
     const isActiveTask = active.data.current?.type === 'todo';
     const isOverTask = over.data.current?.type === 'todo';
-
-    // Droping inside the TODO list-
-
-    ///THIS WORKING
     if (isActiveTask && isOverTask) {
       setTasks((tasks) => {
         // to find the index
         const activeIndex = tasks.findIndex((task) => task.id === activeTaskId);
         const overIndex = tasks.findIndex((task) => task.id === overTaskId);
-
-        // If in the same column
-        // tasks[activeIndex].columnId = tasks[overIndex].columnId;
         return arrayMove(tasks, activeIndex, overIndex);
       });
     }
 
     // Droping to the DONE list
-
     const isOverDone = over.data.current?.type === 'done';
-
     if (isActiveTask && isOverDone) {
       const activeIndex = tasks.findIndex((task) => task.id === activeTaskId);
       const overIndex = tasks.findIndex((task) => task.id === overTaskId);
@@ -207,21 +147,6 @@ export default function Home() {
         return arrayMove(done, activeIndex, overIndex);
       });
     }
-
-    // // Droping to a DONE list
-    // const isOverDone = over.data.current?.type === 'done';
-
-    // if (isActiveTask && isOverDone) {
-    //   setTasks((tasks) => {
-    //     // to find the index
-    //     const activeIndex = tasks.findIndex((task) => task.id === activeTaskId);
-
-    //     // to change the type
-    //     tasks[overIndex].type = over.type;
-
-    //     return arrayMove(tasks, activeIndex, overIndex);
-    //   });
-    // }
   };
 
   return (

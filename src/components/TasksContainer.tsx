@@ -146,8 +146,8 @@ export default function TasksContainer(props: TaskContainerProps) {
               {tasks.map((task, idx) => {
                 return (
                   <Tasks
-                    task={task}
                     key={task.id}
+                    task={task}
                     createTask={createTask}
                     updateTask={updateTask}
                     removeTask={removeTask}
