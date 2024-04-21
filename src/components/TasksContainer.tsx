@@ -38,8 +38,9 @@ interface TaskContainerProps {
   columnId: Id;
   setTasks: React.Dispatch<React.SetStateAction<Task[]>>;
   createTask: (
-    event: React.MouseEvent | React.KeyboardEvent,
+    event: React.MouseEvent | React.KeyboardEvent | undefined,
     inputValue?: string,
+    type?: 'todo' | 'done',
     date?: Date,
     index?: number
   ) => void;
@@ -66,15 +67,16 @@ export default function TasksContainer(props: TaskContainerProps) {
     id: columnId,
     data: {
       type: type,
+      tasks: tasks,
     },
     disabled: enableAddBtn, // Disable dragging if a task is being added
   });
 
-  // const style = {
-  //   transform: CSS.Transform.toString(transform),
-  //   transition,
-  //   // cursor: isDragging ? 'grabbing' : 'pointer', // Change cursor when dragging
-  // };
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    // cursor: isDragging ? 'grabbing' : 'pointer', // Change cursor when dragging
+  };
 
   const updateTask = (id: Id, taskValue: string, dueDate: Date | null) => {
     const updateTasks = tasks.map((task) => {
@@ -97,19 +99,23 @@ export default function TasksContainer(props: TaskContainerProps) {
     setTasks(updateTasks);
   };
 
-  // if (isDragging) {
-  //   return (
-  //     <div
-  //       className="relative flex text-white bg-[#32a88b] shadow-lg text-base opacity-60 border-2 border-rose-300 h-10 px-4 py-1.5 rounded-lg w-full leading-7 cursor-grab"
-  //       ref={setNodeRef}
-  //       style={style}
-  //       {...attributes}
-  //       {...listeners}></div>
-  //   );
-  // }
+  if (isDragging) {
+    return (
+      <div
+        className="relative flex text-white bg-[#32a88b] shadow-lg text-base opacity-60 border-2 border-rose-300 h-10 px-4 py-1.5 rounded-lg w-full leading-7 cursor-grab"
+        ref={setNodeRef}
+        style={style}
+        {...attributes}
+        {...listeners}></div>
+    );
+  }
 
   return (
-    <div>
+    <div
+      ref={setNodeRef}
+      {...attributes}
+      {...listeners}
+      style={style}>
       {type === 'todo' && (
         <h2 className="text-xl font-semibold text-center p-4">To do</h2>
       )}
@@ -126,21 +132,26 @@ export default function TasksContainer(props: TaskContainerProps) {
 
         <div className="grid gap-2">
           <SortableContext
+            id={columnId.toString()}
             items={tasks.map((task) => task.id)}
-            strategy={verticalListSortingStrategy}>
-            {tasks.map((task, idx) => {
-              return (
-                <Tasks
-                  key={task.id}
-                  task={task}
-                  createTask={createTask}
-                  updateTask={updateTask}
-                  removeTask={removeTask}
-                  setEnableAddBtn={setEnableAddBtn}
-                  lastElement={idx === tasks.length - 1}
-                />
-              );
-            })}
+            strategy={horizontalListSortingStrategy}>
+            <div
+              ref={setNodeRef}
+              className="grid gap-2">
+              {tasks.map((task, idx) => {
+                return (
+                  <Tasks
+                    task={task}
+                    key={task.id}
+                    createTask={createTask}
+                    updateTask={updateTask}
+                    removeTask={removeTask}
+                    setEnableAddBtn={setEnableAddBtn}
+                    lastElement={idx === tasks.length - 1}
+                  />
+                );
+              })}
+            </div>
           </SortableContext>
         </div>
       </div>

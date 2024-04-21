@@ -23,17 +23,20 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { create } from 'domain';
 
 export default function Home() {
   const [tasks, setTasks] = useState<Task[]>([]);
+  const [done, setDone] = useState<Task[]>([]);
   const [adding, setAdding] = useState(false);
 
   const todoId = useMemo(() => uuidv4(), []);
   const doneId = useMemo(() => uuidv4(), []);
 
   const createTask = (
-    event: React.MouseEvent | React.KeyboardEvent,
+    event: React.MouseEvent | React.KeyboardEvent | undefined,
     inputValue?: string,
+    type: 'todo' | 'done' = 'todo',
     date?: Date
   ) => {
     const newTask: Task = {
@@ -66,7 +69,6 @@ export default function Home() {
 
   // DRAG AND DROP
   const onDragStart = (event: DragStartEvent) => {
-    console.log(event);
     // Dragging a card from another column
     if (event.active.data.current?.type === 'todo') {
       setActiveTask(event.active.data.current.task);
@@ -80,11 +82,8 @@ export default function Home() {
   };
 
   const onDragEnd = (event: DragEndEvent) => {
-    console.log(event);
-    setActiveTask(null);
-
+    setActiveTask(null); // Reset active card, when dropped
     const { active, over } = event;
-
     if (!over) {
       return;
     }
@@ -99,9 +98,23 @@ export default function Home() {
     setTasks((tasks) => {
       const activeIndex = tasks.findIndex((task) => task.id === activeTaskId);
       const overIndex = tasks.findIndex((task) => task.id === overTaskId);
-
       return arrayMove(tasks, activeIndex, overIndex);
     });
+
+    if (active.data.current?.type === 'done') {
+      createTask(
+        undefined,
+        active.data.current.task,
+        'done',
+        active.data.current.dueDate
+      );
+
+      setDone((done) => {
+        const activeIndex = done.findIndex((task) => task.id === activeTaskId);
+        const overIndex = done.findIndex((task) => task.id === overTaskId);
+        return arrayMove(done, activeIndex, overIndex);
+      });
+    }
   };
 
   const onDragOver = (event: DragOverEvent) => {
@@ -111,6 +124,12 @@ export default function Home() {
 
     const activeTaskId = active.id;
     const overTaskId = over.id;
+
+    const initialContainer = active.data.current?.sortable?.containerId;
+    const finalContainer = over.data.current?.sortable?.containerId;
+
+    // if are none initial sortable list, return
+    if (!initialContainer) return;
 
     if (activeTaskId === overTaskId) return;
 
@@ -125,7 +144,8 @@ export default function Home() {
         const activeIndex = tasks.findIndex((task) => task.id === activeTaskId);
         const overIndex = tasks.findIndex((task) => task.id === overTaskId);
 
-        // // to change the type
+        // If in the same column
+        // tasks[activeIndex].columnId = tasks[overIndex].columnId;
         return arrayMove(tasks, activeIndex, overIndex);
       });
     }
@@ -171,7 +191,7 @@ export default function Home() {
             <TasksContainer
               columnId={doneId}
               type="done"
-              tasks={tasks.filter((task) => task.columnId === doneId)}
+              tasks={done.filter((doneTask) => doneTask.columnId === doneId)}
               setTasks={setTasks}
               createTask={createTask}
               activeTask={activeTask}
@@ -189,7 +209,7 @@ export default function Home() {
                 onClick={(e: React.MouseEvent) => {
                   e.preventDefault();
 
-                  createTask(e, '');
+                  createTask(e, '', 'todo');
                   setAdding(!adding);
                 }}>
                 Add a new task +
