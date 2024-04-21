@@ -44,17 +44,22 @@ interface TaskContainerProps {
     date?: Date,
     index?: number
   ) => void;
+  removeTask: (id: Id) => void;
   activeTask: Task | null;
 }
 
 export default function TasksContainer(props: TaskContainerProps) {
-  const { type, columnId, setTasks, tasks, createTask, activeTask } = props;
+  const {
+    type,
+    columnId,
+    setTasks,
+    tasks,
+    createTask,
+    activeTask,
+    removeTask,
+  } = props;
 
   const [enableAddBtn, setEnableAddBtn] = useState(true);
-
-  const removeTask = (id: string) => {
-    setTasks(tasks.filter((task) => task.id !== id));
-  };
 
   const {
     attributes,
@@ -133,8 +138,8 @@ export default function TasksContainer(props: TaskContainerProps) {
         <div className="grid gap-2">
           <SortableContext
             id={columnId.toString()}
-            items={tasks.map((task) => task.id)}
-            strategy={horizontalListSortingStrategy}>
+            items={tasks}
+            strategy={verticalListSortingStrategy}>
             <div
               ref={setNodeRef}
               className="grid gap-2">

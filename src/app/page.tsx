@@ -3,7 +3,7 @@ import React, { useMemo } from 'react';
 import { useState } from 'react';
 import TasksContainer from '../components/TasksContainer';
 import { v4 as uuidv4 } from 'uuid'; // Generate unique IDs
-import { Task } from '@/types';
+import { Id, Task } from '@/types';
 import DatePicker from '@/components/Datepicker';
 import {
   closestCenter,
@@ -56,6 +56,25 @@ export default function Home() {
     }
   };
 
+  const removeTask = (id: Id) => {
+    setTasks(tasks.filter((task) => task.id !== id));
+  };
+
+  const doneTask = (id: string, taskDone: string | null) => {
+    const newDone: Task = {
+      id: id,
+      columnId: doneId,
+      type: 'done',
+      task: taskDone,
+      dueDate: null,
+    };
+
+    if (done.length > 0) return;
+
+    removeTask(id);
+    setDone([...done, newDone]);
+  };
+
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
@@ -84,37 +103,66 @@ export default function Home() {
   const onDragEnd = (event: DragEndEvent) => {
     setActiveTask(null); // Reset active card, when dropped
     const { active, over } = event;
-    if (!over) {
-      return;
-    }
+
+    if (!over) return;
 
     const activeTaskId = active.id;
     const overTaskId = over.id;
 
-    if (activeTaskId === overTaskId) {
+    console.log(active.data.current?.type);
+    console.log(over?.data.current?.type);
+    if (active.data.current?.type === 'todo') return;
+
+    //if not in the same column
+    if (
+      active.data.current?.sortable.containerId !==
+      over?.data.current?.sortable.containerId
+    )
       return;
-    }
 
-    setTasks((tasks) => {
-      const activeIndex = tasks.findIndex((task) => task.id === activeTaskId);
-      const overIndex = tasks.findIndex((task) => task.id === overTaskId);
-      return arrayMove(tasks, activeIndex, overIndex);
-    });
+    const containerName = active.data.current?.sortable.containerId;
 
-    if (active.data.current?.type === 'done') {
-      createTask(
-        undefined,
-        active.data.current.task,
-        'done',
-        active.data.current.dueDate
-      );
+    // Change items based on drag end position
 
-      setDone((done) => {
-        const activeIndex = done.findIndex((task) => task.id === activeTaskId);
-        const overIndex = done.findIndex((task) => task.id === overTaskId);
-        return arrayMove(done, activeIndex, overIndex);
-      });
-    }
+    // setTasks((tasks) => {
+    //   // const tempTasks = { ...tasks };
+    //   // const oldIndex = tempTasks[containerName].indexOf(active.id.toString());
+    //   // const newIndex = tempTasks[containerName].indexOf(over?.id.toString());
+    //   // // tempTasks[containerName] = arrayMove(tempTasks[containerName], oldIndex, newIndex);
+    //   // // return tempTasks;
+    // });
+
+    // if (!over) {
+    //   return;
+    // }
+
+    // const activeTaskId = active.id;
+    // const overTaskId = over.id;
+
+    // if (activeTaskId === overTaskId) {
+    //   return;
+    // }
+
+    // setTasks((tasks) => {
+    //   const activeIndex = tasks.findIndex((task) => task.id === activeTaskId);
+    //   const overIndex = tasks.findIndex((task) => task.id === overTaskId);
+    //   return arrayMove(tasks, activeIndex, overIndex);
+    // });
+
+    // if (active.data.current?.type === 'done') {
+    //   createTask(
+    //     undefined,
+    //     active.data.current.task,
+    //     'done',
+    //     active.data.current.dueDate
+    //   );
+
+    //   setDone((done) => {
+    //     const activeIndex = done.findIndex((task) => task.id === activeTaskId);
+    //     const overIndex = done.findIndex((task) => task.id === overTaskId);
+    //     return arrayMove(done, activeIndex, overIndex);
+    //   });
+    // }
   };
 
   const onDragOver = (event: DragOverEvent) => {
@@ -125,12 +173,6 @@ export default function Home() {
     const activeTaskId = active.id;
     const overTaskId = over.id;
 
-    const initialContainer = active.data.current?.sortable?.containerId;
-    const finalContainer = over.data.current?.sortable?.containerId;
-
-    // if are none initial sortable list, return
-    if (!initialContainer) return;
-
     if (activeTaskId === overTaskId) return;
 
     const isActiveTask = active.data.current?.type === 'todo';
@@ -138,6 +180,7 @@ export default function Home() {
 
     // Droping inside the TODO list-
 
+    ///THIS WORKING
     if (isActiveTask && isOverTask) {
       setTasks((tasks) => {
         // to find the index
@@ -147,6 +190,21 @@ export default function Home() {
         // If in the same column
         // tasks[activeIndex].columnId = tasks[overIndex].columnId;
         return arrayMove(tasks, activeIndex, overIndex);
+      });
+    }
+
+    // Droping to the DONE list
+
+    const isOverDone = over.data.current?.type === 'done';
+
+    if (isActiveTask && isOverDone) {
+      const activeIndex = tasks.findIndex((task) => task.id === activeTaskId);
+      const overIndex = tasks.findIndex((task) => task.id === overTaskId);
+      tasks[activeIndex].columnId = doneId;
+
+      setDone((done) => {
+        doneTask(tasks[activeIndex].id.toString(), tasks[activeIndex].task);
+        return arrayMove(done, activeIndex, overIndex);
       });
     }
 
@@ -181,20 +239,22 @@ export default function Home() {
           id="instanceId">
           <div className="grid grid-cols-2 gap-8 w-2/3 justify-self-center">
             <TasksContainer
-              tasks={tasks.filter((task) => task.columnId === todoId)}
+              tasks={tasks}
               columnId={todoId}
               type="todo"
               setTasks={setTasks}
               createTask={createTask}
               activeTask={activeTask}
+              removeTask={removeTask}
             />
             <TasksContainer
               columnId={doneId}
               type="done"
-              tasks={done.filter((doneTask) => doneTask.columnId === doneId)}
+              tasks={done}
               setTasks={setTasks}
               createTask={createTask}
               activeTask={activeTask}
+              removeTask={removeTask}
             />
           </div>
         </DndContext>

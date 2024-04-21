@@ -73,8 +73,11 @@ const Tasks = (props: TasksProps) => {
 
   return (
     <div className="flex w-full justify-between align-items-center">
-      <div
-        className="flex w-full  relative justify-self-stretch text-white bg-[#32a88b] shadow-lg text-base  px-4 py-1.5 rounded-lg leading-7 cursor-grab"
+      <button
+        className={`flex w-full text-start  relative justify-self-stretch text-white ${
+          task.type === 'done' ? 'opacity-60 bg-slate-400' : ''
+        } bg-[#32a88b] shadow-lg text-base  px-4 py-1.5 rounded-lg leading-7 cursor-grab`}
+        disabled={task.type === 'done'}
         ref={setNodeRef}
         style={style}
         {...attributes}
@@ -117,7 +120,7 @@ const Tasks = (props: TasksProps) => {
         <div className="flex items-center">
           <DatePicker />
         </div>
-      </div>
+      </button>
 
       <div
         className="flex justify-center items-center cursor-pointer "
