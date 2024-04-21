@@ -107,7 +107,6 @@ const Tasks = (props: TasksProps) => {
                   onKeyDown={(e) => {
                     if (e.key !== 'Enter') return;
                     setEditMode(false);
-                    // setInputField(false);
                     createTask(e);
                   }}
                 />
