@@ -1,7 +1,6 @@
 'use client';
 import { Id, Task } from '@/types';
 import {
-  closestCenter,
   DndContext,
   DragOverlay,
   DragEndEvent,
@@ -46,6 +45,7 @@ interface TaskContainerProps {
   ) => void;
   removeTask: (id: Id) => void;
   activeTask: Task | null;
+  updateTask: (id: string, task: string, dueDate: Date | null) => void;
 }
 
 export default function TasksContainer(props: TaskContainerProps) {
@@ -57,9 +57,11 @@ export default function TasksContainer(props: TaskContainerProps) {
     createTask,
     activeTask,
     removeTask,
+    updateTask,
   } = props;
 
   const [enableAddBtn, setEnableAddBtn] = useState(true);
+  const [dragEnabled, setDragEnabled] = useState(false);
 
   const {
     attributes,
@@ -71,10 +73,10 @@ export default function TasksContainer(props: TaskContainerProps) {
   } = useSortable({
     id: columnId,
     data: {
-      type: type,
-      tasks: tasks,
+      type: `${type}-container`,
+      tasks,
     },
-    disabled: enableAddBtn, // Disable dragging if a task is being added
+    disabled: enableAddBtn || dragEnabled, // Disable dragging if a task is being added
   });
 
   const style = {
@@ -83,35 +85,19 @@ export default function TasksContainer(props: TaskContainerProps) {
     // cursor: isDragging ? 'grabbing' : 'pointer', // Change cursor when dragging
   };
 
-  const updateTask = (id: Id, taskValue: string, dueDate: Date | null) => {
-    const updateTasks = tasks.map((task) => {
-      if (task.id !== id)
-        return {
-          id: task.id,
-          columnId: task.columnId,
-          type: task.type,
-          task: task.task,
-          dueDate: task.dueDate,
-        };
-      return {
-        id: task.id,
-        columnId: task.columnId,
-        type: task.type,
-        task: taskValue,
-        dueDate: dueDate,
-      };
-    });
-    setTasks(updateTasks);
-  };
+  const tasksIds = useMemo(() => {
+    return tasks.map((task) => task.id);
+  }, [tasks]); // Recompute tasksIds when tasks change
 
   if (isDragging) {
     return (
       <div
-        className="relative flex text-white bg-[#32a88b] shadow-lg text-base opacity-60 border-2 border-rose-300 h-10 px-4 py-1.5 rounded-lg w-full leading-7 cursor-grab"
+        className="relative flex text-white bg-[#32a88b] shadow-lg text-base opacity-30 border-2 border-rose-300 h-10 px-4 py-1.5 rounded-lg w-full leading-7 cursor-grab"
         ref={setNodeRef}
         style={style}
         {...attributes}
-        {...listeners}></div>
+        {...listeners}
+      />
     );
   }
 
@@ -120,7 +106,8 @@ export default function TasksContainer(props: TaskContainerProps) {
       ref={setNodeRef}
       {...attributes}
       {...listeners}
-      style={style}>
+      style={style}
+      id="portal">
       {type === 'todo' && (
         <h2 className="text-xl font-semibold text-center p-4">To do</h2>
       )}
@@ -137,30 +124,49 @@ export default function TasksContainer(props: TaskContainerProps) {
 
         <div className="grid gap-2">
           <SortableContext
-            id={columnId.toString()}
-            items={tasks}
+            items={tasksIds}
             strategy={verticalListSortingStrategy}>
             <div
-              ref={setNodeRef}
+              // ref={setNodeRef}
               className="grid gap-2">
-              {tasks.map((task, idx) => {
-                return (
+              {tasks.map(
+                (task, idx) =>
+                  // Check if task is truthy and has an id property
+                  task &&
+                  task.id && (
+                    <Tasks
+                      key={task.id}
+                      task={task}
+                      createTask={createTask}
+                      updateTask={updateTask}
+                      removeTask={removeTask}
+                      setEnableAddBtn={setEnableAddBtn}
+                      lastElement={idx === tasks.length - 1}
+                    />
+                  )
+              )}
+            </div>
+            {createPortal(
+              <DragOverlay>
+                {activeTask && (
                   <Tasks
-                    key={task.id}
-                    task={task}
+                    key={activeTask.id}
+                    task={activeTask}
                     createTask={createTask}
                     updateTask={updateTask}
                     removeTask={removeTask}
                     setEnableAddBtn={setEnableAddBtn}
-                    lastElement={idx === tasks.length - 1}
+                    lastElement={false}
                   />
-                );
-              })}
-            </div>
+                )}
+              </DragOverlay>,
+              document.body
+            )}
           </SortableContext>
         </div>
       </div>
-      {activeTask && (
+
+      {/* {activeTask && (
         <DragOverlay>
           <Tasks
             key={activeTask.id}
@@ -172,7 +178,7 @@ export default function TasksContainer(props: TaskContainerProps) {
             lastElement={false}
           />
         </DragOverlay>
-      )}
+      )} */}
     </div>
   );
 }

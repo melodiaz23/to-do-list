@@ -25,18 +25,11 @@ const Tasks = (props: TasksProps) => {
     createTask,
     updateTask,
     removeTask,
-    // setInputField,
     lastElement,
     setEnableAddBtn,
   } = props;
 
   const [editMode, setEditMode] = useState(false);
-
-  useEffect(() => {
-    if (isDragging) {
-      setEnableAddBtn(false);
-    }
-  });
 
   const {
     attributes,
@@ -48,7 +41,7 @@ const Tasks = (props: TasksProps) => {
   } = useSortable({
     id: task.id,
     data: {
-      type: task.type,
+      type: 'task',
       task,
     },
     disabled: editMode, // Disable dragging if in edit mode
@@ -59,6 +52,12 @@ const Tasks = (props: TasksProps) => {
     transition,
     // cursor: isDragging ? 'grabbing' : 'pointer', // Change cursor when dragging
   };
+
+  useEffect(() => {
+    if (isDragging) {
+      setEnableAddBtn(false);
+    }
+  }, [isDragging]);
 
   if (isDragging) {
     return (
