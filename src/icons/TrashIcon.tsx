@@ -1,4 +1,8 @@
-const TrashIcon = (props) => {
+interface TrashIconProps {
+  fill: string;
+}
+
+const TrashIcon = (props: TrashIconProps) => {
   const { fill } = props;
   return (
     <svg

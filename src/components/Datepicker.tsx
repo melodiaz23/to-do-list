@@ -18,6 +18,7 @@ const DatePicker = (props: DatepickerProps) => {
 
   const inputProps = {
     placeholder: 'Choose a due date',
+    id: task.id.toString(),
     style: {
       backgroundColor: 'transparent',
       border: 'none',
