@@ -97,8 +97,7 @@ export default function TasksContainer(props: TaskContainerProps) {
         <div className="grid gap-2">
           <SortableContext
             // items={tasksIds}
-
-            items={tasks.map((task) => task.id)}
+            items={tasks.map((task) => task)}
             strategy={verticalListSortingStrategy}>
             <div className="grid gap-2">
               {tasks.map(
