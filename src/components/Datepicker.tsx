@@ -1,10 +1,20 @@
 import CalendarDaysIcon from '@/icons/CalendarDaysIcon';
-import React, { useState } from 'react';
+import { Task } from '@/types';
+import React, { useEffect, useState } from 'react';
 import Datetime from 'react-datetime';
 import 'react-datetime/css/react-datetime.css';
 
-const DatePicker = () => {
-  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+interface DatepickerProps {
+  task: Task;
+  updateTask: (id: string, task: string | null, dueDate: Date | null) => void;
+  setEditMode: (editMode: boolean) => void;
+}
+const DatePicker = (props: DatepickerProps) => {
+  const { task, updateTask, setEditMode } = props;
+
+  const [selectedDate, setSelectedDate] = useState<Date>(
+    new Date(task.dueDate || new Date())
+  );
 
   const inputProps = {
     placeholder: 'Choose a due date',
@@ -21,15 +31,17 @@ const DatePicker = () => {
 
   const handleDateChange = (newDate: Date) => {
     setSelectedDate(newDate);
+    updateTask(task.id.toString(), task.task, newDate);
+    setEditMode(true);
   };
 
   return (
     <div className="flex items-center relative">
       <div>
         <Datetime
-          onChange={(selectedDate) =>
-            handleDateChange(selectedDate as unknown as Date)
-          }
+          onChange={(selectedDate) => {
+            handleDateChange(selectedDate as unknown as Date);
+          }}
           closeOnSelect
           value={selectedDate}
           input={true}

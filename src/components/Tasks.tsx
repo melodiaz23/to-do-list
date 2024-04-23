@@ -13,7 +13,7 @@ interface TasksProps {
   task: Task;
   createTask: (event: React.MouseEvent | React.KeyboardEvent) => void;
   removeTask: (id: string) => void;
-  updateTask: (id: string, task: string, dueDate: Date | null) => void;
+  updateTask: (id: string, task: string | null, dueDate: Date | null) => void;
   // setInputField: (value: boolean) => void;
   lastElement: boolean;
 }
@@ -51,6 +51,12 @@ const Tasks = (props: TasksProps) => {
   //   }
   // }, [isDragging]);
 
+  useEffect(() => {
+    if (task.dueDate === new Date()) {
+      setEditMode(false);
+    }
+  }, [task.dueDate]);
+
   if (isDragging) {
     return (
       <div
@@ -75,13 +81,13 @@ const Tasks = (props: TasksProps) => {
         style={style}
         {...attributes}
         {...listeners}
-        onClick={() => setEditMode(true)}>
+        onClick={() => setEditMode((prevEditMode) => !prevEditMode)}>
         <div className="w-full ">
           <div>
             {!editMode &&
               (task.task !== ''
                 ? task.task
-                : (setEditMode(true), (<div></div>)))}
+                : (setEditMode(() => !editMode), (<div></div>)))}
 
             {editMode && (
               <>
@@ -111,7 +117,11 @@ const Tasks = (props: TasksProps) => {
           </div>
         </div>
         <div className="flex items-center">
-          <DatePicker />
+          <DatePicker
+            task={task}
+            updateTask={updateTask}
+            setEditMode={setEditMode}
+          />
         </div>
       </button>
 

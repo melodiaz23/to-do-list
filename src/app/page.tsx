@@ -77,14 +77,18 @@ export default function Home() {
     setTasks(updatedTasks);
   };
 
-  const doneTask = (id: string, taskDone: string | null) => {
+  const doneTask = (
+    id: string,
+    taskDone: string | null,
+    dueDate: Date | null
+  ) => {
     if (!taskDone) return;
     const newDone: Task = {
       id: id,
       columnId: doneId,
       type: 'done',
       task: taskDone,
-      dueDate: null,
+      dueDate: dueDate,
     };
 
     removeTask(id);
@@ -180,7 +184,11 @@ export default function Home() {
         );
 
         arrayMove(filteredTasks, activeIndex, activeIndex);
-        doneTask(activeTaskId.toString(), tasks[activeIndex].task);
+        doneTask(
+          activeTaskId.toString(),
+          tasks[activeIndex].task,
+          tasks[activeIndex].dueDate
+        );
         return filteredTasks;
       });
     }

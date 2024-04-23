@@ -10,12 +10,10 @@ import {
 } from '@dnd-kit/sortable';
 import React, { useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { v4 as uuidv4 } from 'uuid'; // Generate unique IDs
 
 import Tasks from '../components/Tasks';
 
 import { CSS } from '@dnd-kit/utilities';
-import { Darumadrop_One, Donegal_One } from 'next/font/google';
 
 interface TaskContainerProps {
   tasks: Task[];
@@ -31,7 +29,7 @@ interface TaskContainerProps {
   ) => void;
   removeTask: (id: Id) => void;
   activeTask: Task | null;
-  updateTask: (id: string, task: string, dueDate: Date | null) => void;
+  updateTask: (id: string, task: string | null, dueDate: Date | null) => void;
 }
 
 export default function TasksContainer(props: TaskContainerProps) {
