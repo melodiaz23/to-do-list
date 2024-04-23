@@ -16,18 +16,10 @@ interface TasksProps {
   updateTask: (id: string, task: string, dueDate: Date | null) => void;
   // setInputField: (value: boolean) => void;
   lastElement: boolean;
-  setEnableAddBtn: (value: boolean) => void;
 }
 
 const Tasks = (props: TasksProps) => {
-  const {
-    task,
-    createTask,
-    updateTask,
-    removeTask,
-    lastElement,
-    setEnableAddBtn,
-  } = props;
+  const { task, createTask, updateTask, removeTask, lastElement } = props;
 
   const [editMode, setEditMode] = useState(false);
 
@@ -53,22 +45,22 @@ const Tasks = (props: TasksProps) => {
     // cursor: isDragging ? 'grabbing' : 'pointer', // Change cursor when dragging
   };
 
-  useEffect(() => {
-    if (isDragging) {
-      setEnableAddBtn(false);
-    }
-  }, [isDragging]);
+  // useEffect(() => {
+  //   if (isDragging) {
+  //     setEnableAddBtn(false);
+  //   }
+  // }, [isDragging]);
 
-  if (isDragging) {
-    return (
-      <div
-        className="relative flex text-white bg-[#32a88b] shadow-lg text-base opacity-60 border-2 border-rose-300 h-10 px-4 py-1.5 rounded-lg w-full leading-7 cursor-grab"
-        ref={setNodeRef}
-        style={style}
-        {...attributes}
-        {...listeners}></div>
-    );
-  }
+  // if (isDragging) {
+  //   return (
+  //     <div
+  //       className="relative flex text-white bg-[#32a88b] shadow-lg text-base opacity-60 border-2 border-rose-300 h-10 px-4 py-1.5 rounded-lg w-full leading-7 cursor-grab"
+  //       ref={setNodeRef}
+  //       style={style}
+  //       {...attributes}
+  //       {...listeners}></div>
+  //   );
+  // }
 
   return (
     <div className="flex w-full justify-between align-items-center">

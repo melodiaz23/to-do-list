@@ -123,12 +123,13 @@ export default function TasksContainer(props: TaskContainerProps) {
                       createTask={createTask}
                       updateTask={updateTask}
                       removeTask={removeTask}
+                      setEnableAddBtn={setEnableAddBtn}
                       lastElement={idx === tasks.length - 1}
                     />
                   )
               )}
             </div>
-            {/* {typeof document !== 'undefined' &&
+            {typeof document !== 'undefined' &&
               createPortal(
                 <DragOverlay>
                   {activeTask && (
@@ -138,17 +139,18 @@ export default function TasksContainer(props: TaskContainerProps) {
                       createTask={createTask}
                       updateTask={updateTask}
                       removeTask={removeTask}
+                      setEnableAddBtn={setEnableAddBtn}
                       lastElement={false}
                     />
                   )}
                 </DragOverlay>,
                 document.body
-              )} */}
+              )}
           </SortableContext>
         </div>
       </div>
 
-      {activeTask && (
+      {/* {activeTask && (
         <DragOverlay>
           <Tasks
             key={activeTask.id}
@@ -156,10 +158,11 @@ export default function TasksContainer(props: TaskContainerProps) {
             createTask={createTask}
             updateTask={updateTask}
             removeTask={removeTask}
+            setEnableAddBtn={setEnableAddBtn}
             lastElement={false}
           />
         </DragOverlay>
-      )}
+      )} */}
     </div>
   );
 }

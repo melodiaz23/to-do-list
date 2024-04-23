@@ -1,5 +1,5 @@
 'use client';
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useState } from 'react';
 import TasksContainer from '../components/TasksContainer';
 import { v4 as uuidv4 } from 'uuid'; // Generate unique IDs
@@ -16,6 +16,7 @@ import {
   useSensors,
 } from '@dnd-kit/core';
 import { arrayMove } from '@dnd-kit/sortable';
+import { useEvent } from '@dnd-kit/utilities';
 
 export default function Home() {
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -51,7 +52,12 @@ export default function Home() {
     setTasks(tasks.filter((task) => task.id !== id));
   };
 
-  const updateTask = (id: Id, taskValue: string, dueDate: Date | null) => {
+  const updateTask = (
+    id: Id,
+    taskValue: string,
+    dueDate: Date | null,
+    type?: 'todo' | 'done'
+  ) => {
     const updateTasks = tasks.map((task) => {
       if (task.id !== id)
         return {
@@ -73,6 +79,7 @@ export default function Home() {
   };
 
   const doneTask = (id: string, taskDone: string | null) => {
+    if (!taskDone) return;
     const newDone: Task = {
       id: id,
       columnId: doneId,
@@ -80,8 +87,6 @@ export default function Home() {
       task: taskDone,
       dueDate: null,
     };
-
-    if (done.length > 0) return;
 
     removeTask(id);
     setDone([...done, newDone]);
@@ -117,15 +122,9 @@ export default function Home() {
     const { active, over } = event;
 
     if (!over) return;
-
-    console.log(active.data.current?.type);
-    console.log(over?.data.current?.type);
-
     if (active.data.current?.type === 'task') return;
 
-    if (over?.data.current?.type === 'done-container') {
-      doneTask(active.id.toString(), active.data.current?.task);
-    }
+    if (over?.data.current?.type === 'done-container') return;
   };
 
   const onDragOver = (event: DragOverEvent) => {
@@ -148,30 +147,31 @@ export default function Home() {
           (task) => task.id === activeTaskId
         );
         const overIndex = todoTasks.findIndex((task) => task.id === overTaskId);
-
-        todoTasks[activeIndex].columnId = todoTasks[overIndex].columnId;
+        // todoTasks[activeIndex].columnId = todoTasks[overIndex].columnId;
 
         return arrayMove(todoTasks, activeIndex, overIndex); // Araymove take as arguments the array, the index of the element to move, and the new index
       });
     }
 
     // Droping to the DONE list
-
     const isOverDone = over.data.current?.type === 'done-container';
     if (isActiveTask && isOverDone) {
-      setTasks((doneTask) => {
-        // to find the index
-        const activeIndex = doneTask.findIndex(
-          (task) => task.id === activeTaskId
-        );
-        const overIndex = doneTask.findIndex((task) => task.id === overTaskId);
+      console.log('DROP TO DONE');
+      const activeIndex = tasks.findIndex((task) => task.id === activeTaskId);
 
-        doneTask[activeIndex].columnId = doneId;
-
-        return arrayMove(doneTask, activeIndex, activeIndex); // Araymove take as arguments the array, the index of the element to move, and the new index
+      setTasks(() => {
+        const updatedTasks = [...tasks];
+        if (activeIndex === -1) return tasks;
+        updatedTasks[activeIndex].columnId = doneId;
+        updatedTasks.filter((task) => task.id === activeTaskId);
+        arrayMove(updatedTasks, activeIndex, activeIndex);
+        doneTask(activeTaskId.toString(), tasks[activeIndex].task);
+        return updatedTasks;
       });
     }
   };
+
+  useEffect(() => {}, [tasks]);
 
   return (
     <div className="grid grid-rows-[auto_1fr] h-screen">
