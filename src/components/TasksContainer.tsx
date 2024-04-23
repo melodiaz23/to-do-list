@@ -74,18 +74,6 @@ export default function TasksContainer(props: TaskContainerProps) {
   //   return tasks.map((task) => task.id);
   // }, [tasks]); // Recompute tasksIds when tasks change
 
-  if (isDragging) {
-    return (
-      <div
-        className="relative flex text-white bg-[#32a88b] shadow-lg text-base opacity-30 border-2 border-rose-300 h-10 px-4 py-1.5 rounded-lg w-full leading-7 cursor-grab"
-        ref={setNodeRef}
-        style={style}
-        {...attributes}
-        {...listeners}
-      />
-    );
-  }
-
   return (
     <div
       ref={setNodeRef}
