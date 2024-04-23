@@ -54,7 +54,7 @@ export default function Home() {
 
   const updateTask = (
     id: Id,
-    taskValue: string,
+    taskValue: string | null,
     dueDate: Date | null,
     type?: 'todo' | 'done'
   ) => {
@@ -63,13 +63,13 @@ export default function Home() {
         return {
           id: task.id,
           columnId: task.columnId,
-          type: task.type,
+          type: 'todo',
           task: task.task,
           dueDate: task.dueDate,
         };
       return {
         id: task.id,
-        columnId: task.columnId,
+        columnId: task.type === 'todo' ? todoId : doneId,
         type: task.type,
         task: taskValue,
         dueDate: dueDate,
@@ -92,6 +92,10 @@ export default function Home() {
     setDone([...done, newDone]);
   };
 
+  const removeDoneTask = (id: string) => {
+    setDone(done.filter((task) => task.id !== id));
+  };
+
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
@@ -111,10 +115,10 @@ export default function Home() {
       return;
     }
 
-    // if (event.active.data.current?.type === 'done') {
-    //   setActiveTask(event.active.data.current.task);
-    //   return;
-    // }
+    if (event.active.data.current?.type === 'done') {
+      setActiveTask(event.active.data.current.task);
+      return;
+    }
   };
 
   const onDragEnd = (event: DragEndEvent) => {
@@ -122,9 +126,10 @@ export default function Home() {
     const { active, over } = event;
 
     if (!over) return;
-    if (active.data.current?.type === 'task') return;
 
+    if (active.data.current?.type === 'task') return;
     if (over?.data.current?.type === 'done-container') return;
+    if (over?.data.current?.type === 'todo-container') return;
   };
 
   const onDragOver = (event: DragOverEvent) => {
@@ -138,9 +143,12 @@ export default function Home() {
     // Droping inside the TODO list
     const isActiveTask = active.data.current?.type === 'task';
     const isOverTask = over.data.current?.type === 'task';
+    const isOverToDo = over.data.current?.type === 'todo-container';
+
     if (!isActiveTask) return;
 
     if (isActiveTask && isOverTask) {
+      console.log('OVER TASK');
       setTasks((todoTasks) => {
         // to find the index
         const activeIndex = todoTasks.findIndex(
@@ -156,22 +164,51 @@ export default function Home() {
     // Droping to the DONE list
     const isOverDone = over.data.current?.type === 'done-container';
     if (isActiveTask && isOverDone) {
-      console.log('DROP TO DONE');
+      console.log('OVER TO DONE');
       const activeIndex = tasks.findIndex((task) => task.id === activeTaskId);
+
+      if (activeIndex === -1) return;
+
+      if (done && done.some((task) => task.id === doneId)) return;
 
       setTasks(() => {
         const updatedTasks = [...tasks];
         if (activeIndex === -1) return tasks;
         updatedTasks[activeIndex].columnId = doneId;
-        updatedTasks.filter((task) => task.id === activeTaskId);
-        arrayMove(updatedTasks, activeIndex, activeIndex);
+        updatedTasks[activeIndex].type = 'done';
+        const filteredTasks = updatedTasks.filter(
+          (task) => task.id !== activeTaskId
+        );
+
+        arrayMove(filteredTasks, activeIndex, activeIndex);
         doneTask(activeTaskId.toString(), tasks[activeIndex].task);
-        return updatedTasks;
+        return filteredTasks;
+      });
+    }
+
+    // Droping to the TODO list
+
+    if (isActiveTask && isOverToDo) {
+      console.log('OVER TO TODO');
+      const activeIndex = done.findIndex((task) => task.id === activeTaskId);
+
+      if (activeIndex === -1) return done;
+
+      setDone(() => {
+        const updateDoneTasks = [...done];
+        updateDoneTasks[activeIndex].columnId = todoId;
+        updateDoneTasks[activeIndex].type = 'todo';
+        removeDoneTask(activeTaskId.toString());
+        setTasks(() => {
+          return [
+            ...tasks,
+            ...updateDoneTasks.filter((task) => task.id === activeTaskId),
+          ];
+        });
+        return updateDoneTasks.filter((task) => task.id !== activeTaskId);
       });
     }
   };
-
-  // useEffect(() => {}, [tasks]);
 
   return (
     <div className="grid grid-rows-[auto_1fr] h-screen">

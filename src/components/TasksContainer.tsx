@@ -15,6 +15,7 @@ import { v4 as uuidv4 } from 'uuid'; // Generate unique IDs
 import Tasks from '../components/Tasks';
 
 import { CSS } from '@dnd-kit/utilities';
+import { Darumadrop_One, Donegal_One } from 'next/font/google';
 
 interface TaskContainerProps {
   tasks: Task[];
@@ -98,6 +99,7 @@ export default function TasksContainer(props: TaskContainerProps) {
         <div className="grid gap-2">
           <SortableContext
             // items={tasksIds}
+
             items={tasks.map((task) => task.id)}
             strategy={verticalListSortingStrategy}>
             <div className="grid gap-2">

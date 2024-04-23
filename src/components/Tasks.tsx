@@ -54,7 +54,9 @@ const Tasks = (props: TasksProps) => {
   if (isDragging) {
     return (
       <div
-        className="relative flex text-white bg-[#32a88b] shadow-lg text-base opacity-60 border-2 border-rose-300 h-10 px-4 py-1.5 rounded-lg w-full leading-7 cursor-grab"
+        className={`relative flex text-white ${
+          task.type === 'todo' ? 'bg-[#32a88b]' : 'bg-gray-200'
+        } shadow-lg text-base opacity-60 border-2 border-rose-300 h-10 px-4 py-1.5 rounded-lg w-full leading-7 cursor-grab`}
         ref={setNodeRef}
         style={style}
         {...attributes}
