@@ -70,9 +70,9 @@ export default function TasksContainer(props: TaskContainerProps) {
     // cursor: isDragging ? 'grabbing' : 'pointer', // Change cursor when dragging
   };
 
-  const tasksIds = useMemo(() => {
-    return tasks.map((task) => task.id);
-  }, [tasks]); // Recompute tasksIds when tasks change
+  // const tasksIds = useMemo(() => {
+  //   return tasks.map((task) => task.id);
+  // }, [tasks]); // Recompute tasksIds when tasks change
 
   if (isDragging) {
     return (
@@ -109,7 +109,8 @@ export default function TasksContainer(props: TaskContainerProps) {
 
         <div className="grid gap-2">
           <SortableContext
-            items={tasksIds}
+            // items={tasksIds}
+            items={tasks.map((task) => task.id)}
             strategy={verticalListSortingStrategy}>
             <div className="grid gap-2">
               {tasks.map(

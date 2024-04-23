@@ -171,7 +171,7 @@ export default function Home() {
     }
   };
 
-  useEffect(() => {}, [tasks]);
+  // useEffect(() => {}, [tasks]);
 
   return (
     <div className="grid grid-rows-[auto_1fr] h-screen">
