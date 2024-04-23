@@ -53,29 +53,28 @@ export default function Home() {
   };
 
   const updateTask = (
-    id: Id,
-    taskValue: string | null,
-    dueDate: Date | null,
-    type?: 'todo' | 'done'
+    taskId: Id,
+    newValue: string | null,
+    newDueDate: Date | null,
+    newType?: 'todo' | 'done'
   ) => {
-    const updateTasks = tasks.map((task) => {
-      if (task.id !== id)
-        return {
-          id: task.id,
-          columnId: task.columnId,
-          type: 'todo',
-          task: task.task,
-          dueDate: task.dueDate,
-        };
+    const updatedTasks = tasks.map((task) => {
+      if (task.id !== taskId) return { ...task };
+
       return {
-        id: task.id,
-        columnId: task.type === 'todo' ? todoId : doneId,
-        type: task.type,
-        task: taskValue,
-        dueDate: dueDate,
+        ...task,
+        task: newValue,
+        dueDate: newDueDate,
+        type: newType || task.type,
+        columnId: newType
+          ? newType === 'done'
+            ? doneId
+            : todoId
+          : task.columnId,
       };
     });
-    setTasks(updateTasks);
+
+    setTasks(updatedTasks);
   };
 
   const doneTask = (id: string, taskDone: string | null) => {
