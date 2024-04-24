@@ -53,28 +53,29 @@ export default function Home() {
   };
 
   const updateTask = (
-    taskId: Id,
-    newValue: string | null,
-    newDueDate: Date | null,
-    newType?: 'todo' | 'done'
+    id: Id,
+    taskValue: string | null,
+    dueDate: Date | null,
+    type?: 'todo' | 'done'
   ) => {
-    const updatedTasks = tasks.map((task) => {
-      if (task.id !== taskId) return { ...task };
-
+    const updateTasks = tasks.map((task) => {
+      if (task.id !== id)
+        return {
+          id: task.id,
+          columnId: task.columnId,
+          type: 'todo',
+          task: task.task,
+          dueDate: task.dueDate,
+        };
       return {
-        ...task,
-        task: newValue,
-        dueDate: newDueDate,
-        type: newType || task.type,
-        columnId: newType
-          ? newType === 'done'
-            ? doneId
-            : todoId
-          : task.columnId,
+        id: task.id,
+        columnId: task.type === 'todo' ? todoId : doneId,
+        type: task.type,
+        task: taskValue,
+        dueDate: dueDate,
       };
     });
-
-    setTasks(updatedTasks);
+    setTasks(updateTasks);
   };
 
   const doneTask = (
@@ -90,7 +91,6 @@ export default function Home() {
       task: taskDone,
       dueDate: dueDate,
     };
-
     removeTask(id);
     setDone([...done, newDone]);
   };
@@ -107,6 +107,10 @@ export default function Home() {
     })
   );
 
+  useEffect(() => {
+    tasks;
+  }, [tasks, done]);
+
   // ACTIVE CARD
   const [activeTask, setActiveTask] = useState<Task | null>(null);
 
@@ -118,10 +122,10 @@ export default function Home() {
       return;
     }
 
-    if (event.active.data.current?.type === 'done') {
-      setActiveTask(event.active.data.current.task);
-      return;
-    }
+    // if (event.active.data.current?.type === 'done') {
+    //   setActiveTask(event.active.data.current.task);
+    //   return;
+    // }
   };
 
   const onDragEnd = (event: DragEndEvent) => {
@@ -143,7 +147,7 @@ export default function Home() {
     const overTaskId = over.id;
     if (activeTaskId === overTaskId) return;
 
-    // Droping inside the TODO list
+    // Droping inside the SAME list
     const isActiveTask = active.data.current?.type === 'task';
     const isOverTask = over.data.current?.type === 'task';
     const isOverToDo = over.data.current?.type === 'todo-container';
@@ -151,12 +155,24 @@ export default function Home() {
     if (!isActiveTask) return;
 
     if (isActiveTask && isOverTask) {
+      const taskToMove = [...tasks];
+      const activeIndex = taskToMove.findIndex(
+        (task) => task.id === activeTaskId
+      );
       console.log('OVER TASK');
-      setTasks((todoTasks) => {
+      if (done && done.length > 0) {
+        setDone(() => {
+          const updatedDone = [...done];
+          const overIndex = updatedDone.findIndex(
+            (task) => task.id === overTaskId
+          );
+          return arrayMove(updatedDone, activeIndex, overIndex);
+        });
+      }
+      setTasks(() => {
         // to find the index
-        const activeIndex = todoTasks.findIndex(
-          (task) => task.id === activeTaskId
-        );
+        const todoTasks = [...tasks];
+
         const overIndex = todoTasks.findIndex((task) => task.id === overTaskId);
         // todoTasks[activeIndex].columnId = todoTasks[overIndex].columnId;
 
@@ -168,13 +184,9 @@ export default function Home() {
     const isOverDone = over.data.current?.type === 'done-container';
     if (isActiveTask && isOverDone) {
       console.log('OVER TO DONE');
-      const activeIndex = tasks.findIndex((task) => task.id === activeTaskId);
-
-      if (activeIndex === -1) return;
-
-      if (done && done.some((task) => task.id === doneId)) return;
 
       setTasks(() => {
+        const activeIndex = tasks.findIndex((task) => task.id === activeTaskId);
         const updatedTasks = [...tasks];
         if (activeIndex === -1) return tasks;
         updatedTasks[activeIndex].columnId = doneId;
@@ -189,20 +201,22 @@ export default function Home() {
           tasks[activeIndex].task,
           tasks[activeIndex].dueDate
         );
+
         return filteredTasks;
       });
     }
 
-    // Droping to the TODO list
+    // Droping to the TODO list from the DONE list
 
     if (isActiveTask && isOverToDo) {
       console.log('OVER TO TODO');
-      const activeIndex = done.findIndex((task) => task.id === activeTaskId);
 
-      if (activeIndex === -1) return done;
+      // if (activeIndex === -1) return done;
 
       setDone(() => {
+        const activeIndex = done.findIndex((task) => task.id === activeTaskId);
         const updateDoneTasks = [...done];
+        if (activeIndex === -1) return done;
         updateDoneTasks[activeIndex].columnId = todoId;
         updateDoneTasks[activeIndex].type = 'todo';
         removeDoneTask(activeTaskId.toString());

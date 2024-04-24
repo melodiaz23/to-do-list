@@ -44,6 +44,10 @@ export default function TasksContainer(props: TaskContainerProps) {
     updateTask,
   } = props;
 
+  useEffect(() => {
+    tasks;
+  }, [tasks]);
+
   const [enableAddBtn, setEnableAddBtn] = useState(true);
   const [dragEnabled, setDragEnabled] = useState(false);
 
