@@ -6,6 +6,7 @@ import TrashIcon from '.././icons/TrashIcon';
 
 import { Task } from '@/types';
 import DatePicker from './Datepicker';
+import { v4 as uuidv4 } from 'uuid'; // Generate unique IDs
 
 interface TasksProps {
   task: Task;
@@ -91,7 +92,7 @@ const Tasks = (props: TasksProps) => {
                 <input
                   className="w-full border-0 bg-[#32a88b] text-white border-[#32a88b] outline-0 placeholder:text-gray-100"
                   type="text"
-                  id={task.id.toString()}
+                  id={uuidv4()}
                   name="task"
                   autoFocus
                   value={task.task ? task.task : ''}

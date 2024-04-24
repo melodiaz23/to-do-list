@@ -23,8 +23,11 @@ export default function Home() {
   const [done, setDone] = useState<Task[]>([]);
   const [adding, setAdding] = useState(false);
 
-  const todoId = uuidv4();
-  const doneId = uuidv4();
+  const todoId = useMemo(() => uuidv4(), []);
+  const doneId = useMemo(() => uuidv4(), []);
+
+  const memoizedTasks = useMemo(() => tasks, [tasks]);
+  const memoizedDone = useMemo(() => done, [done]);
 
   const createTask = (
     event: React.MouseEvent | React.KeyboardEvent | undefined,
@@ -107,9 +110,9 @@ export default function Home() {
     })
   );
 
-  useEffect(() => {
-    tasks;
-  }, [tasks, done]);
+  // useEffect(() => {
+  //   tasks;
+  // }, [tasks, done]);
 
   // ACTIVE CARD
   const [activeTask, setActiveTask] = useState<Task | null>(null);
@@ -155,27 +158,33 @@ export default function Home() {
     if (!isActiveTask) return;
 
     if (isActiveTask && isOverTask) {
-      const taskToMove = [...tasks];
-      const activeIndex = taskToMove.findIndex(
-        (task) => task.id === activeTaskId
-      );
+      const activeIndex = tasks.findIndex((task) => task.id === activeTaskId);
       console.log('OVER TASK');
-      if (done && done.length > 0) {
-        setDone(() => {
-          const updatedDone = [...done];
-          const overIndex = updatedDone.findIndex(
-            (task) => task.id === overTaskId
-          );
-          return arrayMove(updatedDone, activeIndex, overIndex);
-        });
-      }
-      setTasks(() => {
+      // if (done && done.length > 0) {
+      //   setDone(() => {
+      //     const updatedDone = [...done];
+      //     const overIndex = updatedDone.findIndex(
+      //       (task) => task.id === overTaskId
+      //     );
+      //     return arrayMove(updatedDone, activeIndex, overIndex);
+      //     // return [...updatedDone];
+      //   });
+      // }
+      setTasks((prevTasks) => {
         // to find the index
-        const todoTasks = [...tasks];
-
+        const todoTasks = [...prevTasks];
         const overIndex = todoTasks.findIndex((task) => task.id === overTaskId);
-        // todoTasks[activeIndex].columnId = todoTasks[overIndex].columnId;
-
+        if (overIndex === -1) return todoTasks;
+        todoTasks[activeIndex].columnId = todoTasks[overIndex].columnId;
+        if (done && done.length > 0 && activeTaskId === doneId) {
+          setDone((prevDone) => {
+            // const updatedDone = [...prevDone];
+            const overIndex = prevDone.findIndex(
+              (task) => task.id === overTaskId
+            );
+            return arrayMove(prevDone, activeIndex, overIndex);
+          });
+        }
         return arrayMove(todoTasks, activeIndex, overIndex); // Araymove take as arguments the array, the index of the element to move, and the new index
       });
     }
@@ -185,10 +194,15 @@ export default function Home() {
     if (isActiveTask && isOverDone) {
       console.log('OVER TO DONE');
 
-      setTasks(() => {
-        const activeIndex = tasks.findIndex((task) => task.id === activeTaskId);
-        const updatedTasks = [...tasks];
-        if (activeIndex === -1) return tasks;
+      if (isOverDone && activeTaskId === doneId) return;
+
+      setTasks((prevTasks) => {
+        const activeIndex = prevTasks.findIndex(
+          (task) => task.id === activeTaskId
+        );
+        // const updatedTasks = [...tasks];
+        const updatedTasks = [...prevTasks];
+        if (activeIndex === -1) return memoizedTasks;
         updatedTasks[activeIndex].columnId = doneId;
         updatedTasks[activeIndex].type = 'done';
         const filteredTasks = updatedTasks.filter(
@@ -214,9 +228,11 @@ export default function Home() {
       // if (activeIndex === -1) return done;
 
       setDone(() => {
-        const activeIndex = done.findIndex((task) => task.id === activeTaskId);
-        const updateDoneTasks = [...done];
-        if (activeIndex === -1) return done;
+        const activeIndex = memoizedDone.findIndex(
+          (task) => task.id === activeTaskId
+        );
+        const updateDoneTasks = [...memoizedDone];
+        if (activeIndex === -1) return memoizedDone;
         updateDoneTasks[activeIndex].columnId = todoId;
         updateDoneTasks[activeIndex].type = 'todo';
         removeDoneTask(activeTaskId.toString());
@@ -247,7 +263,7 @@ export default function Home() {
           <div className="grid grid-cols-2 gap-8 w-2/3 justify-self-center">
             <TasksContainer
               columnId={todoId}
-              tasks={tasks}
+              tasks={memoizedTasks}
               type="todo"
               setTasks={setTasks}
               createTask={createTask}
@@ -257,7 +273,7 @@ export default function Home() {
             />
             <TasksContainer
               columnId={doneId}
-              tasks={done}
+              tasks={memoizedDone}
               type="done"
               setTasks={setTasks}
               createTask={createTask}

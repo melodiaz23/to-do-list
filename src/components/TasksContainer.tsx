@@ -44,10 +44,6 @@ export default function TasksContainer(props: TaskContainerProps) {
     updateTask,
   } = props;
 
-  useEffect(() => {
-    tasks;
-  }, [tasks]);
-
   const [enableAddBtn, setEnableAddBtn] = useState(true);
   const [dragEnabled, setDragEnabled] = useState(false);
 
@@ -73,10 +69,6 @@ export default function TasksContainer(props: TaskContainerProps) {
     // cursor: isDragging ? 'grabbing' : 'pointer', // Change cursor when dragging
   };
 
-  // const tasksIds = useMemo(() => {
-  //   return tasks.map((task) => task.id);
-  // }, [tasks]); // Recompute tasksIds when tasks change
-
   return (
     <div
       ref={setNodeRef}
@@ -100,7 +92,6 @@ export default function TasksContainer(props: TaskContainerProps) {
 
         <div className="grid gap-2">
           <SortableContext
-            // items={tasksIds}
             items={tasks.map((task) => task)}
             strategy={verticalListSortingStrategy}>
             <div className="grid gap-2">
