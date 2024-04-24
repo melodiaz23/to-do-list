@@ -4,7 +4,6 @@ import { useState } from 'react';
 import TasksContainer from '../components/TasksContainer';
 import { v4 as uuidv4 } from 'uuid'; // Generate unique IDs
 import { Id, Task } from '@/types';
-import DatePicker from '@/components/Datepicker';
 import {
   closestCenter,
   DndContext,
@@ -16,15 +15,17 @@ import {
   useSensors,
 } from '@dnd-kit/core';
 import { arrayMove } from '@dnd-kit/sortable';
-import { useEvent } from '@dnd-kit/utilities';
 
 export default function Home() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [done, setDone] = useState<Task[]>([]);
   const [adding, setAdding] = useState(false);
 
-  const todoId = uuidv4();
-  const doneId = uuidv4();
+  const todoId = useMemo(() => uuidv4(), []);
+  const doneId = useMemo(() => uuidv4(), []);
+
+  const memoizedTasks = useMemo(() => tasks, [tasks]);
+  const memoizedDone = useMemo(() => done, [done]);
 
   const createTask = (
     event: React.MouseEvent | React.KeyboardEvent | undefined,
@@ -107,9 +108,9 @@ export default function Home() {
     })
   );
 
-  useEffect(() => {
-    tasks;
-  }, [tasks, done]);
+  // useEffect(() => {
+  //   tasks;
+  // }, [tasks, done]);
 
   // ACTIVE CARD
   const [activeTask, setActiveTask] = useState<Task | null>(null);
@@ -147,76 +148,80 @@ export default function Home() {
     const overTaskId = over.id;
     if (activeTaskId === overTaskId) return;
 
-    // Droping inside the SAME list
     const isActiveTask = active.data.current?.type === 'task';
     const isOverTask = over.data.current?.type === 'task';
+    // Droping inside the SAME list
     const isOverToDo = over.data.current?.type === 'todo-container';
 
     if (!isActiveTask) return;
 
     if (isActiveTask && isOverTask) {
-      const taskToMove = [...tasks];
-      const activeIndex = taskToMove.findIndex(
-        (task) => task.id === activeTaskId
-      );
-      console.log('OVER TASK');
-      if (done && done.length > 0) {
-        setDone(() => {
-          const updatedDone = [...done];
-          const overIndex = updatedDone.findIndex(
-            (task) => task.id === overTaskId
-          );
-          return arrayMove(updatedDone, activeIndex, overIndex);
-        });
-      }
-      setTasks(() => {
-        // to find the index
-        const todoTasks = [...tasks];
+      setDone((prevDone) => {
+        const updatedTasks = [...prevDone];
+        const activeIndex = updatedTasks.findIndex(
+          (task) => task.id === activeTaskId
+        );
+        const overIndex = updatedTasks.findIndex(
+          (task) => task.id === overTaskId
+        );
+        if (activeIndex === -1 || overIndex === -1) return prevDone;
 
-        const overIndex = todoTasks.findIndex((task) => task.id === overTaskId);
-        // todoTasks[activeIndex].columnId = todoTasks[overIndex].columnId;
+        return arrayMove(updatedTasks, activeIndex, overIndex);
+      });
 
-        return arrayMove(todoTasks, activeIndex, overIndex); // Araymove take as arguments the array, the index of the element to move, and the new index
+      setTasks((prevTasks) => {
+        const updatedTasks = [...prevTasks];
+        const activeIndex = updatedTasks.findIndex(
+          (task) => task.id === activeTaskId
+        );
+        const overIndex = updatedTasks.findIndex(
+          (task) => task.id === overTaskId
+        );
+
+        if (activeIndex === -1 || overIndex === -1) return updatedTasks;
+
+        updatedTasks[activeIndex].columnId = updatedTasks[overIndex].columnId;
+
+        return arrayMove(updatedTasks, activeIndex, overIndex); // Araymove take as arguments the array, the index of the element to move, and the new index
       });
     }
 
     // Droping to the DONE list
     const isOverDone = over.data.current?.type === 'done-container';
     if (isActiveTask && isOverDone) {
-      console.log('OVER TO DONE');
-
-      setTasks(() => {
-        const activeIndex = tasks.findIndex((task) => task.id === activeTaskId);
-        const updatedTasks = [...tasks];
-        if (activeIndex === -1) return tasks;
+      setTasks((prevTasks) => {
+        const updatedTasks = [...prevTasks];
+        const activeIndex = prevTasks.findIndex(
+          (task) => task.id === activeTaskId
+        );
+        const overIndex = updatedTasks.findIndex(
+          (task) => task.id === overTaskId
+        );
+        if (activeIndex === -1) return updatedTasks;
         updatedTasks[activeIndex].columnId = doneId;
         updatedTasks[activeIndex].type = 'done';
         const filteredTasks = updatedTasks.filter(
           (task) => task.id !== activeTaskId
         );
 
-        arrayMove(filteredTasks, activeIndex, activeIndex);
         doneTask(
           activeTaskId.toString(),
           tasks[activeIndex].task,
           tasks[activeIndex].dueDate
         );
-
+        // arrayMove(filteredTasks, activeIndex, activeIndex);
         return filteredTasks;
       });
     }
 
     // Droping to the TODO list from the DONE list
-
     if (isActiveTask && isOverToDo) {
-      console.log('OVER TO TODO');
-
-      // if (activeIndex === -1) return done;
-
-      setDone(() => {
-        const activeIndex = done.findIndex((task) => task.id === activeTaskId);
-        const updateDoneTasks = [...done];
-        if (activeIndex === -1) return done;
+      setDone((prevDone) => {
+        const activeIndex = prevDone.findIndex(
+          (task) => task.id === activeTaskId
+        );
+        const updateDoneTasks = [...prevDone];
+        if (activeIndex === -1) return updateDoneTasks;
         updateDoneTasks[activeIndex].columnId = todoId;
         updateDoneTasks[activeIndex].type = 'todo';
         removeDoneTask(activeTaskId.toString());
@@ -247,7 +252,7 @@ export default function Home() {
           <div className="grid grid-cols-2 gap-8 w-2/3 justify-self-center">
             <TasksContainer
               columnId={todoId}
-              tasks={tasks}
+              tasks={memoizedTasks}
               type="todo"
               setTasks={setTasks}
               createTask={createTask}
@@ -257,7 +262,7 @@ export default function Home() {
             />
             <TasksContainer
               columnId={doneId}
-              tasks={done}
+              tasks={memoizedDone}
               type="done"
               setTasks={setTasks}
               createTask={createTask}
