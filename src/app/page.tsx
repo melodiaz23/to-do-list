@@ -16,7 +16,6 @@ import {
   useSensors,
 } from '@dnd-kit/core';
 import { arrayMove } from '@dnd-kit/sortable';
-import { useEvent } from '@dnd-kit/utilities';
 
 export default function Home() {
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -159,80 +158,53 @@ export default function Home() {
 
     if (isActiveTask && isOverTask) {
       const activeIndex = tasks.findIndex((task) => task.id === activeTaskId);
-      console.log('OVER TASK');
-      // if (done && done.length > 0) {
-      //   setDone(() => {
-      //     const updatedDone = [...done];
-      //     const overIndex = updatedDone.findIndex(
-      //       (task) => task.id === overTaskId
-      //     );
-      //     return arrayMove(updatedDone, activeIndex, overIndex);
-      //     // return [...updatedDone];
-      //   });
-      // }
+
       setTasks((prevTasks) => {
-        // to find the index
-        const todoTasks = [...prevTasks];
-        const overIndex = todoTasks.findIndex((task) => task.id === overTaskId);
-        if (overIndex === -1) return todoTasks;
-        todoTasks[activeIndex].columnId = todoTasks[overIndex].columnId;
-        if (done && done.length > 0 && activeTaskId === doneId) {
-          setDone((prevDone) => {
-            // const updatedDone = [...prevDone];
-            const overIndex = prevDone.findIndex(
-              (task) => task.id === overTaskId
-            );
-            return arrayMove(prevDone, activeIndex, overIndex);
-          });
-        }
-        return arrayMove(todoTasks, activeIndex, overIndex); // Araymove take as arguments the array, the index of the element to move, and the new index
+        const newTasks = [...prevTasks];
+        const overIndex = newTasks.findIndex((task) => task.id === overTaskId);
+        if (overIndex === -1) return newTasks;
+        return arrayMove(newTasks, activeIndex, overIndex); // Araymove take as arguments the array, the index of the element to move, and the new index
       });
     }
 
     // Droping to the DONE list
     const isOverDone = over.data.current?.type === 'done-container';
     if (isActiveTask && isOverDone) {
-      console.log('OVER TO DONE');
-
-      if (isOverDone && activeTaskId === doneId) return;
+      // if (isOverDone && activeTaskId === doneId) return;
 
       setTasks((prevTasks) => {
+        const updatedTasks = [...prevTasks];
         const activeIndex = prevTasks.findIndex(
           (task) => task.id === activeTaskId
         );
-        // const updatedTasks = [...tasks];
-        const updatedTasks = [...prevTasks];
-        if (activeIndex === -1) return memoizedTasks;
+        const overIndex = updatedTasks.findIndex(
+          (task) => task.id === overTaskId
+        );
+        if (activeIndex === -1) return updatedTasks;
         updatedTasks[activeIndex].columnId = doneId;
         updatedTasks[activeIndex].type = 'done';
         const filteredTasks = updatedTasks.filter(
           (task) => task.id !== activeTaskId
         );
 
-        arrayMove(filteredTasks, activeIndex, activeIndex);
         doneTask(
           activeTaskId.toString(),
           tasks[activeIndex].task,
           tasks[activeIndex].dueDate
         );
-
+        // arrayMove(filteredTasks, activeIndex, overIndex);
         return filteredTasks;
       });
     }
 
     // Droping to the TODO list from the DONE list
-
     if (isActiveTask && isOverToDo) {
-      console.log('OVER TO TODO');
-
-      // if (activeIndex === -1) return done;
-
-      setDone(() => {
-        const activeIndex = memoizedDone.findIndex(
+      setDone((prevDone) => {
+        const activeIndex = prevDone.findIndex(
           (task) => task.id === activeTaskId
         );
-        const updateDoneTasks = [...memoizedDone];
-        if (activeIndex === -1) return memoizedDone;
+        const updateDoneTasks = [...prevDone];
+        if (activeIndex === -1) return updateDoneTasks;
         updateDoneTasks[activeIndex].columnId = todoId;
         updateDoneTasks[activeIndex].type = 'todo';
         removeDoneTask(activeTaskId.toString());
