@@ -4,7 +4,6 @@ import { useState } from 'react';
 import TasksContainer from '../components/TasksContainer';
 import { v4 as uuidv4 } from 'uuid'; // Generate unique IDs
 import { Id, Task } from '@/types';
-import DatePicker from '@/components/Datepicker';
 import {
   closestCenter,
   DndContext,
@@ -149,29 +148,47 @@ export default function Home() {
     const overTaskId = over.id;
     if (activeTaskId === overTaskId) return;
 
-    // Droping inside the SAME list
     const isActiveTask = active.data.current?.type === 'task';
     const isOverTask = over.data.current?.type === 'task';
+    // Droping inside the SAME list
     const isOverToDo = over.data.current?.type === 'todo-container';
 
     if (!isActiveTask) return;
 
     if (isActiveTask && isOverTask) {
-      const activeIndex = tasks.findIndex((task) => task.id === activeTaskId);
+      setDone((prevDone) => {
+        const updatedTasks = [...prevDone];
+        const activeIndex = updatedTasks.findIndex(
+          (task) => task.id === activeTaskId
+        );
+        const overIndex = updatedTasks.findIndex(
+          (task) => task.id === overTaskId
+        );
+        if (activeIndex === -1 || overIndex === -1) return prevDone;
+
+        return arrayMove(updatedTasks, activeIndex, overIndex);
+      });
 
       setTasks((prevTasks) => {
-        const newTasks = [...prevTasks];
-        const overIndex = newTasks.findIndex((task) => task.id === overTaskId);
-        if (overIndex === -1) return newTasks;
-        return arrayMove(newTasks, activeIndex, overIndex); // Araymove take as arguments the array, the index of the element to move, and the new index
+        const updatedTasks = [...prevTasks];
+        const activeIndex = updatedTasks.findIndex(
+          (task) => task.id === activeTaskId
+        );
+        const overIndex = updatedTasks.findIndex(
+          (task) => task.id === overTaskId
+        );
+
+        if (activeIndex === -1 || overIndex === -1) return updatedTasks;
+
+        updatedTasks[activeIndex].columnId = updatedTasks[overIndex].columnId;
+
+        return arrayMove(updatedTasks, activeIndex, overIndex); // Araymove take as arguments the array, the index of the element to move, and the new index
       });
     }
 
     // Droping to the DONE list
     const isOverDone = over.data.current?.type === 'done-container';
     if (isActiveTask && isOverDone) {
-      // if (isOverDone && activeTaskId === doneId) return;
-
       setTasks((prevTasks) => {
         const updatedTasks = [...prevTasks];
         const activeIndex = prevTasks.findIndex(
@@ -192,7 +209,7 @@ export default function Home() {
           tasks[activeIndex].task,
           tasks[activeIndex].dueDate
         );
-        // arrayMove(filteredTasks, activeIndex, overIndex);
+        // arrayMove(filteredTasks, activeIndex, activeIndex);
         return filteredTasks;
       });
     }
