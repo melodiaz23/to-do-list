@@ -51,7 +51,7 @@ const DatePicker = (props: DatepickerProps) => {
           inputProps={inputProps}
           className="appearance-none rounded text-gray-700 text-base outline-none focus:outline-none focus:ring-none md:mr-5"
         />
-        <div className="absolute h-full text-gray-700 right-0 md:-right-2 top-0">
+        <div className="absolute h-full text-gray-700 -right-1 md:-right-2 top-0">
           <CalendarDaysIcon fill="white" />
         </div>
       </div>
