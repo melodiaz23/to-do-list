@@ -249,7 +249,7 @@ export default function Home() {
           onDragOver={onDragOver}
           sensors={sensors}
           id="instanceId">
-          <div className="grid grid-cols-2 gap-8 w-2/3 justify-self-center">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full lg:w-2/3 justify-self-center">
             <TasksContainer
               columnId={todoId}
               tasks={memoizedTasks}
@@ -274,7 +274,7 @@ export default function Home() {
         </DndContext>
         <form
           name="task"
-          id="task"
+          id={`task-form`}
           className="grid gap-2">
           <div className="flex justify-between text-white bg-[#32a88b] shadow-lg text-base  px-4 py-1.5 rounded-lg w-full leading-7">
             <div className="w-full">
@@ -282,7 +282,6 @@ export default function Home() {
                 className="w-full border-0 bg-[#32a88b] text-white border-[#32a88b] outline-0 placeholder:text-gray-100"
                 onClick={(e: React.MouseEvent) => {
                   e.preventDefault();
-
                   createTask(e, '', 'todo');
                   setAdding(!adding);
                 }}>
