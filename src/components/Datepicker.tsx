@@ -37,8 +37,8 @@ const DatePicker = (props: DatepickerProps) => {
   };
 
   return (
-    <div className="flex items-center relative">
-      <div>
+    <div className="flex items-center relative ">
+      <div className="">
         <Datetime
           onChange={(selectedDate) => {
             handleDateChange(selectedDate as unknown as Date);
@@ -49,9 +49,9 @@ const DatePicker = (props: DatepickerProps) => {
           dateFormat="DD/MM/YYYY"
           timeFormat={false}
           inputProps={inputProps}
-          className="appearance-none rounded text-gray-700 text-base outline-none focus:outline-none focus:ring-none"
+          className="appearance-none rounded text-gray-700 text-base outline-none focus:outline-none focus:ring-none md:mr-5"
         />
-        <div className="h-full text-gray-700 absolute right-0 top-0">
+        <div className="absolute h-full text-gray-700 right-0 md:-right-2 top-0">
           <CalendarDaysIcon fill="white" />
         </div>
       </div>
