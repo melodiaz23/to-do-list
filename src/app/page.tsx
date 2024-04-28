@@ -253,7 +253,7 @@ export default function Home() {
         className="p-8">
         <div className="w-full">
           <button
-            className="w-full border-0 px-4 py-2 text-teal-50 text-xl font-semibold shadow-md rounded-lg leading-7 bg-teal-600 outline-0 placeholder:text-gray-100"
+            className="w-full font-aleo border-0 px-4 py-2 text-teal-50 text-xl font-semibold shadow-md rounded-lg leading-7 bg-teal-600 outline-0 placeholder:text-gray-100"
             onClick={(e: React.MouseEvent) => {
               e.preventDefault();
               createTask(e, null, 'todo');

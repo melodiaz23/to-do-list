@@ -77,7 +77,7 @@ export default function TasksContainer(props: TaskContainerProps) {
       style={style}
       id="portal">
       <h2 className="text-xl font-aleo font-semibold text-center p-4">
-        {type === 'todo' ? 'Todo' : 'Done'}
+        {type === 'todo' ? 'TODO' : 'DONE'}
       </h2>
       <div
         className={`w-80 min-h-16 lg:min-h-36 lg:w-[440px] lg:min-w-[440px] bg-white rounded-lg p-5 lg:p-6 mb-4 shadow-md text-[#545454] border-t-4 ${
