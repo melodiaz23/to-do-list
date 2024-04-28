@@ -22,7 +22,7 @@ interface TaskContainerProps {
   setTasks: React.Dispatch<React.SetStateAction<Task[]>>;
   createTask: (
     event: React.MouseEvent | React.KeyboardEvent | React.FormEvent | undefined,
-    inputValue?: string,
+    inputValue?: string | null,
     type?: 'todo' | 'done',
     date?: Date,
     index?: number
@@ -66,7 +66,7 @@ export default function TasksContainer(props: TaskContainerProps) {
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
-    // cursor: isDragging ? 'grabbing' : 'pointer', // Change cursor when dragging
+    cursor: 'pointer',
     touchAction: 'none',
   };
 
@@ -88,6 +88,7 @@ export default function TasksContainer(props: TaskContainerProps) {
         }`}
         onClick={(e) => {
           if (type === 'done') return;
+
           createTask(undefined, '', 'todo');
         }}>
         {/* <span style={{ display: type === 'done' ? 'none' : 'block' }}>

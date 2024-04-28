@@ -47,8 +47,6 @@ export default function Home() {
     };
 
     setTasks([...tasks, newTask]);
-
-    // setTasks([...tasks, newTask]);
   };
 
   const removeTask = (id: Id) => {
@@ -61,7 +59,13 @@ export default function Home() {
     dueDate: Date | null,
     type?: 'todo' | 'done'
   ) => {
+    if (id && taskValue === '') {
+      console.log('REMOVE TASK', id, taskValue, dueDate, type);
+      removeTask(id);
+      return;
+    }
     if (!taskValue?.trim()) return;
+
     const updateTasks = tasks.map((task) => {
       if (task.id !== id)
         return {
@@ -243,7 +247,7 @@ export default function Home() {
     <div className="flex flex-col items-center h-screen">
       <div className="w-full">
         <h1 className="text-3xl font-aleo font-600 font-bold bg-teal-700 font-jersey-10 text-center p-8 text-teal-50">
-          Todo List
+          TODO LIST
         </h1>
       </div>
 

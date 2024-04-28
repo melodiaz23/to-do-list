@@ -10,7 +10,11 @@ import { v4 as uuidv4 } from 'uuid'; // Generate unique IDs
 interface TasksProps {
   task: Task;
   createTask: (
-    event: React.MouseEvent | React.KeyboardEvent | React.FormEvent
+    event: React.MouseEvent | React.KeyboardEvent | React.FormEvent,
+    inputValue?: string | null,
+    type?: 'todo' | 'done',
+    date?: Date,
+    index?: number
   ) => void;
   removeTask: (id: string) => void;
   updateTask: (id: string, task: string | null, dueDate: Date | null) => void;
@@ -20,7 +24,9 @@ interface TasksProps {
 const Tasks = (props: TasksProps) => {
   const { task, createTask, updateTask, removeTask, lastElement } = props;
 
-  const [editMode, setEditMode] = useState(true);
+  const [editMode, setEditMode] = useState(
+    task.type === 'todo' && task.task === '' ? true : false
+  );
   const [adding, setAdding] = useState(false);
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -86,7 +92,7 @@ const Tasks = (props: TasksProps) => {
       <div className="flex justify-between ">
         <div className="w-full flex ">
           <button
-            className={`w-full lg:w-90% h-14 text-pretty-200 flex flex-1 items-center text-start relative justify-self-stretch bg-teal-600 shadow-lg text-base px-4 py-1.5 rounded-lg leading-7  text-white disabled:bg-slate-400 disabled:opacity-90  ${
+            className={`w-full lg:w-90% min-h-14 h-auto min text-pretty-200 flex flex-1 items-center text-start relative justify-self-stretch bg-teal-600 shadow-lg text-base px-4 py-1.5 rounded-lg leading-7  text-white disabled:bg-slate-400 disabled:opacity-90  ${
               isDragging ? 'cursor-grabbing' : 'cursor-grab'
             } `}
             disabled={task.type === 'done'}
@@ -98,7 +104,7 @@ const Tasks = (props: TasksProps) => {
               e.stopPropagation();
               setEditMode(true);
             }}>
-            <div className="w-full border-0 text-white outline-0">
+            <div className="w-full  border-0 text-white outline-0">
               {!editMode && task.task}
 
               {editMode && (
@@ -129,13 +135,13 @@ const Tasks = (props: TasksProps) => {
                       onKeyDown={(e) => {
                         e.stopPropagation();
                         if (e.key !== 'Enter') return;
-                        setEditMode(false);
-                        createTask(e);
+                        if (task.task === '') {
+                          setEditMode(true);
+                        } else {
+                          setEditMode(false);
+                          createTask(e, null, 'todo');
+                        }
                       }}></textarea>
-                    <input
-                      type="submit"
-                      value=""
-                    />
                   </form>
                 </>
               )}
@@ -155,6 +161,7 @@ const Tasks = (props: TasksProps) => {
             } `}
             onClick={(e) => {
               e.stopPropagation();
+              if (editMode) return;
               removeTask(task.id.toString());
               // setEditMode(true);
             }}>
@@ -166,7 +173,9 @@ const Tasks = (props: TasksProps) => {
               viewBox="0 0 24 24"
               strokeWidth={1.5}
               stroke="currentColor"
-              className="w-5 h-5 lg:w-6 lg:h-6">
+              className={`w-5 h-5 lg:w-6 lg:h-6 ${
+                !editMode ? 'invisible' : 'visible'
+              }`}>
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
