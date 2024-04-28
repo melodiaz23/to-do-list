@@ -21,8 +21,8 @@ interface TaskContainerProps {
   columnId: Id;
   setTasks: React.Dispatch<React.SetStateAction<Task[]>>;
   createTask: (
-    event: React.MouseEvent | React.KeyboardEvent | undefined,
-    inputValue?: string,
+    event: React.MouseEvent | React.KeyboardEvent | React.FormEvent | undefined,
+    inputValue?: string | null,
     type?: 'todo' | 'done',
     date?: Date,
     index?: number
@@ -66,7 +66,8 @@ export default function TasksContainer(props: TaskContainerProps) {
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
-    // cursor: isDragging ? 'grabbing' : 'pointer', // Change cursor when dragging
+    cursor: 'pointer',
+    touchAction: 'none',
   };
 
   return (
@@ -76,19 +77,26 @@ export default function TasksContainer(props: TaskContainerProps) {
       {...listeners}
       style={style}
       id="portal">
-      {type === 'todo' && (
-        <h2 className="text-xl font-semibold text-center p-4">To do</h2>
-      )}
-      {type === 'done' && (
-        <h2 className="text-xl font-semibold text-center p-4">Done</h2>
-      )}
-      <div className=" bg-white rounded-lg p-5 mb-4 shadow-md text-[#545454]">
-        <span style={{ display: type === 'done' ? 'none' : 'block' }}>
-          <div className="grid grid-cols-2 pb-2">
-            <div className="w-2/3 justify-self-center">Task</div>
-            <div className="w-1/3 justify-self-center">Due Date</div>
+      <h2 className="text-xl font-aleo font-semibold text-center p-4">
+        {type === 'todo' ? 'TODO' : 'DONE'}
+      </h2>
+      <div
+        className={`w-80 min-h-16 lg:min-h-36 lg:w-[440px] lg:min-w-[440px] bg-white rounded-lg p-4 lg:p-6 shadow-md text-[#545454] border-t-4 ${
+          type === 'todo'
+            ? 'border-t-amber-600 pr-2 lg:pr-3'
+            : 'border-t-teal-500'
+        }`}
+        onClick={(e) => {
+          if (type === 'done') return;
+
+          createTask(undefined, '', 'todo');
+        }}>
+        {/* <span style={{ display: type === 'done' ? 'none' : 'block' }}>
+          <div className="flex justify-between pb-2">
+            <div className=" justify-self-center">Task</div>
+            <div className=" justify-self-center">Due Date</div>
           </div>
-        </span>
+        </span> */}
 
         <div className="grid gap-2">
           <SortableContext

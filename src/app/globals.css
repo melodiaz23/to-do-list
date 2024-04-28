@@ -9,3 +9,8 @@ body {
 input:focus {
   outline: none;
 }
+
+:root {
+  --font-inter: 'Inter', sans-serif;
+  --font-aleo: 'Aleo', serif;
+}

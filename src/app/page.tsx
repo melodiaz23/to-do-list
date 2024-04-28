@@ -28,25 +28,25 @@ export default function Home() {
   const memoizedDone = useMemo(() => done, [done]);
 
   const createTask = (
-    event: React.MouseEvent | React.KeyboardEvent | undefined,
-    inputValue?: string,
+    event: React.MouseEvent | React.KeyboardEvent | React.FormEvent | undefined,
+    inputValue?: string | null,
     type: 'todo' | 'done' = 'todo',
     date?: Date
   ) => {
+    if (tasks.length > 0 && tasks[tasks.length - 1].task === '') {
+      console.log('CANT CREATE TASK');
+      return;
+    }
+    // if (!inputValue?.trim()) return;
     const newTask: Task = {
       id: uuidv4(),
       columnId: todoId,
       type: 'todo',
-      task: inputValue || '',
+      task: inputValue?.trim() || '',
       dueDate: null,
     };
 
-    if (tasks.length > 0 && tasks[tasks.length - 1].task === '') {
-      console.log('CANT CREATE TASK');
-      return;
-    } else {
-      setTasks([...tasks, newTask]);
-    }
+    setTasks([...tasks, newTask]);
   };
 
   const removeTask = (id: Id) => {
@@ -59,6 +59,13 @@ export default function Home() {
     dueDate: Date | null,
     type?: 'todo' | 'done'
   ) => {
+    if (id && taskValue === '') {
+      console.log('REMOVE TASK', id, taskValue, dueDate, type);
+      removeTask(id);
+      return;
+    }
+    if (!taskValue?.trim()) return;
+
     const updateTasks = tasks.map((task) => {
       if (task.id !== id)
         return {
@@ -237,11 +244,31 @@ export default function Home() {
   };
 
   return (
-    <div className="grid grid-rows-[auto_1fr] h-screen">
-      <div className="grid w-[90%] justify-items-center justify-self-center px-6 pt-6 pb-28">
-        <h1 className="text-2xl font-bold font-serif text-center p-8">
-          To Do List
+    <div className="flex flex-col items-center h-screen">
+      <div className="w-full">
+        <h1 className="text-3xl font-aleo font-600 font-bold bg-teal-700 font-jersey-10 text-center p-8 text-teal-50">
+          TODO LIST
         </h1>
+      </div>
+
+      <form
+        name="task"
+        id={`task-form`}
+        className="p-8">
+        <div className="w-full">
+          <button
+            className="w-full font-aleo border-0 px-4 py-2 text-teal-50 text-xl font-semibold shadow-md rounded-lg leading-7 bg-teal-600 outline-0 placeholder:text-gray-100"
+            onClick={(e: React.MouseEvent) => {
+              e.preventDefault();
+              createTask(e, null, 'todo');
+              setAdding(!adding);
+            }}>
+            Add a new task +
+          </button>
+        </div>
+      </form>
+
+      <div className="justify-self-center lg:px-6 pb-28">
         <DndContext
           collisionDetection={closestCenter}
           onDragStart={onDragStart}
@@ -249,7 +276,7 @@ export default function Home() {
           onDragOver={onDragOver}
           sensors={sensors}
           id="instanceId">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full lg:w-2/3 justify-self-center">
+          <div className="flex flex-col lg:flex-row gap-8 w-full justify-self-center">
             <TasksContainer
               columnId={todoId}
               tasks={memoizedTasks}
@@ -272,24 +299,6 @@ export default function Home() {
             />
           </div>
         </DndContext>
-        <form
-          name="task"
-          id={`task-form`}
-          className="grid gap-2">
-          <div className="flex justify-between text-white bg-[#32a88b] shadow-lg text-base  px-4 py-1.5 rounded-lg w-full leading-7">
-            <div className="w-full">
-              <button
-                className="w-full border-0 bg-[#32a88b] text-white border-[#32a88b] outline-0 placeholder:text-gray-100"
-                onClick={(e: React.MouseEvent) => {
-                  e.preventDefault();
-                  createTask(e, '', 'todo');
-                  setAdding(!adding);
-                }}>
-                Add a new task +
-              </button>
-            </div>
-          </div>
-        </form>
       </div>
     </div>
   );
