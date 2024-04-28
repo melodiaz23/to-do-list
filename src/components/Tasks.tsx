@@ -84,9 +84,9 @@ const Tasks = (props: TasksProps) => {
   return (
     <>
       <div className="flex justify-between ">
-        <div className="w-full flex  ">
+        <div className="w-full flex ">
           <button
-            className={`w-90% h-14 text-pretty-200 lg:flex lg:flex-1  lg:items-center text-start relative justify-self-stretch bg-teal-600 shadow-lg text-base px-4 py-1.5 rounded-lg leading-7  text-white disabled:bg-slate-400 disabled:opacity-90  ${
+            className={`w-full lg:w-90% h-14 text-pretty-200 flex flex-1 items-center text-start relative justify-self-stretch bg-teal-600 shadow-lg text-base px-4 py-1.5 rounded-lg leading-7  text-white disabled:bg-slate-400 disabled:opacity-90  ${
               isDragging ? 'cursor-grabbing' : 'cursor-grab'
             } `}
             disabled={task.type === 'done'}
@@ -150,8 +150,8 @@ const Tasks = (props: TasksProps) => {
           </button>
 
           <div
-            className={`flex justify-center ml-1 items-center cursor-pointer ${
-              task.type === 'done' ? 'hidden' : ''
+            className={`flex  ml-[2px] items-center cursor-pointer ${
+              task.type === 'done' ? 'hidden' : 'justify-self-end '
             } `}
             onClick={(e) => {
               e.stopPropagation();
@@ -166,7 +166,7 @@ const Tasks = (props: TasksProps) => {
               viewBox="0 0 24 24"
               strokeWidth={1.5}
               stroke="currentColor"
-              className="w-6 h-6">
+              className="w-5 h-5 lg:w-6 lg:h-6">
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"

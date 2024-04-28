@@ -21,6 +21,7 @@ const DatePicker = (props: DatepickerProps) => {
     id: task.id.toString(),
     style: {
       backgroundColor: 'transparent',
+      // fontSize: 'inherit',
       border: 'none',
       color: '#f0fdfa',
       width: '100%',
@@ -49,10 +50,13 @@ const DatePicker = (props: DatepickerProps) => {
           dateFormat="DD/MM/YYYY"
           timeFormat={false}
           inputProps={inputProps}
-          className="appearance-none rounded text-gray-700 text-base outline-none focus:outline-none focus:ring-none md:mr-5"
+          className="appearance-none rounded text-gray-700 text-sm lg:text-base outline-none focus:outline-none focus:ring-none md:mr-5"
         />
-        <div className="absolute h-full text-gray-700 left-24 lg:-right-1 md:-right-2 top-0">
-          <CalendarDaysIcon fill="#f0fdfa" />
+        <div className="absolute  text-gray-700 -right-2 lg:-right-1 md:-right-2 lg:top-0">
+          <CalendarDaysIcon
+            fill="#f0fdfa"
+            className="w-5 h-5 lg:w-6 lg:h-6"
+          />
         </div>
       </div>
     </div>

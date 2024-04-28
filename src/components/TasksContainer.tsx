@@ -67,6 +67,7 @@ export default function TasksContainer(props: TaskContainerProps) {
     transform: CSS.Transform.toString(transform),
     transition,
     // cursor: isDragging ? 'grabbing' : 'pointer', // Change cursor when dragging
+    touchAction: 'none',
   };
 
   return (
@@ -80,8 +81,10 @@ export default function TasksContainer(props: TaskContainerProps) {
         {type === 'todo' ? 'TODO' : 'DONE'}
       </h2>
       <div
-        className={`w-80 min-h-16 lg:min-h-36 lg:w-[440px] lg:min-w-[440px] bg-white rounded-lg p-5 lg:p-6 mb-4 shadow-md text-[#545454] border-t-4 ${
-          type === 'todo' ? 'border-t-amber-600' : 'border-t-teal-500'
+        className={`w-80 min-h-16 lg:min-h-36 lg:w-[440px] lg:min-w-[440px] bg-white rounded-lg p-4 lg:p-6 shadow-md text-[#545454] border-t-4 ${
+          type === 'todo'
+            ? 'border-t-amber-600 pr-2 lg:pr-3'
+            : 'border-t-teal-500'
         }`}
         onClick={(e) => {
           if (type === 'done') return;

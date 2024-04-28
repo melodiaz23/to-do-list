@@ -19,9 +19,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${inter.variable} ${aleo.variable}`}>
+      <body className={`${inter.variable} ${aleo.variable} min-h-screen`}>
         {/* <Navbar /> */}
-        {children}
+        <div className="min-h-screen flex flex-col lg:flex">{children}</div>
       </body>
     </html>
   );
